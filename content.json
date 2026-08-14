@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-14T21:23:38.424Z",
+  "generated": "2026-08-14T21:35:29.727Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -39,6 +39,10 @@
       {
         "name": "Divar",
         "src": "clients/Divar.png"
+      },
+      {
+        "name": "Snapp Group",
+        "src": "clients/Snapp Group.jpg"
       }
     ],
     "engagements": [
