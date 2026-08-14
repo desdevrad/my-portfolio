@@ -1,0 +1,7 @@
+[
+  { "key": "LOGOS",   "sub": "MARKS & IDENTITY",   "kind": 0 },
+  { "key": "POSTERS", "sub": "PRINT & EDITORIAL",  "kind": 1 },
+  { "key": "3D",      "sub": "FORM & RENDER",      "kind": 2 },
+  { "key": "XR",      "sub": "SPATIAL & REALTIME", "kind": 3 },
+  { "key": "MOTION",  "sub": "TIME & SEQUENCE",    "kind": 4 }
+]
