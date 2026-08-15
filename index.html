@@ -2284,8 +2284,14 @@ addEventListener('pointercancel', letGo);
 // interface feedback
 document.querySelectorAll('.hud a, .hud button').forEach(a=>{
   a.addEventListener('pointerenter', ()=>blip(1180, 0.03));
-  if(a.id === 'sound') return;
-  a.addEventListener('pointerdown', ()=>{ startAudio(); blip(880, 0.06); });
+  // unlock on pointerdown, the earliest signal a touch gives us — by the time
+  // a synthetic 'click' arrives on mobile, the browser's user-activation
+  // window can already have lapsed, which is why the sound toggle used to
+  // need a second tap to actually start audio.
+  a.addEventListener('pointerdown', ()=>{
+    startAudio();
+    if(a.id !== 'sound') blip(880, 0.06);
+  });
 });
 
 // the wheel turns the form about its own vertical axis, so you can walk around it
