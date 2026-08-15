@@ -2230,6 +2230,17 @@ const SPIN_PER_PX = 0.0070;
 const TILT_PER_PX = 0.0042;
 let tilt = 0, tiltV = 0, grab = null;
 
+// belt-and-braces: some mobile WebKit builds are inconsistent about treating
+// a bare 'pointerdown' as the kind of user gesture that's allowed to unlock
+// Web Audio, even though it fires and looks completely normal. 'touchstart'
+// and 'mousedown' have always been on that allowlist everywhere, which is
+// the real reason the nav buttons "worked" — their click handlers quietly
+// caught what pointerdown missed. The 3D model had no such fallback, so a
+// tap that only landed on canvas could silently fail to unlock on iOS.
+addEventListener('touchstart', startAudio, { passive:true });
+addEventListener('mousedown', startAudio);
+addEventListener('click', startAudio);
+
 addEventListener('pointerdown', e=>{
   // unlock audio on the very first touch contact anywhere on the page —
   // this must run before the UI exclusion below, which only exists to stop
