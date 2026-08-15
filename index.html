@@ -180,6 +180,28 @@
   .sound.live .bars i:nth-child(4){animation-duration:.94s;animation-delay:.3s}
   @keyframes vu{0%,100%{height:2px}50%{height:9px}}
 
+  /* ── the caption: what the form is being, right now ──
+     It sits under the object and changes with it. The argument of the piece is
+     in this line, so it is treated as content rather than as a tooltip. */
+  .formcap{position:fixed;left:50%;top:64%;transform:translate(-50%,0);z-index:4;
+    display:flex;flex-direction:column;align-items:center;gap:5px;
+    pointer-events:none;text-align:center;max-width:min(84vw,440px);
+    transition:opacity .5s ease}
+  .formcap .cap-row{display:flex;align-items:center;gap:9px}
+  .formcap .cap-idea{font-family:'Azeret Mono',ui-monospace,monospace;font-size:7.5px;
+    letter-spacing:.3em;color:var(--mute);text-shadow:var(--tsh)}
+  .formcap .cap-tag{font-family:'Azeret Mono',ui-monospace,monospace;font-size:8.5px;
+    letter-spacing:.26em;color:var(--void);background:var(--ice);padding:4px 8px;line-height:1;
+    transition:opacity .35s ease}
+  .formcap .cap-line{font-size:11px;letter-spacing:.05em;color:var(--dim);
+    line-height:1.5;text-shadow:var(--tsh);transition:opacity .35s ease}
+  .formcap.swap .cap-tag,.formcap.swap .cap-line{opacity:0}
+  .formcap.hidden{opacity:0}
+  @media (max-width:720px){
+    .formcap .cap-line{font-size:10px}
+    .formcap .cap-idea{display:none}
+  }
+
   /* ── explore chips around the form ────────────────── */
   .explore{position:fixed;inset:0;z-index:4;pointer-events:none}
   .chip{position:absolute;transform:translate(-50%,-50%) scale(.82);
@@ -561,6 +583,14 @@
   <div class="lens-count" id="lenscount"><b id="lensnow">01</b><i>/</i><span id="lenstotal">01</span></div>
 </div>
 
+<div class="formcap" id="formcap" aria-live="polite">
+  <div class="cap-row">
+    <span class="cap-idea">ONE IDEA</span>
+    <b class="cap-tag" id="captag">FORM 00</b>
+  </div>
+  <span class="cap-line" id="capline">an idea, before it has taken a shape</span>
+</div>
+
 <div class="hud">
   <div class="brackets" aria-hidden="true"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div>
 
@@ -622,8 +652,22 @@ import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 
-/* ══ model ════════════════════════════════════════════════════════════════ */
-const MODEL_URL = 'model/logo.glb';   // swap this file to try a different model — see model/README.md
+/* ══ the form ═════════════════════════════════════════════════════════════
+   The thing in the middle is deliberately nameless. It is not a logo, not an
+   initial, not a symbol that stands for anything — it is a mass with an
+   interior, built here in code so that no one can read a name into it.
+
+   Its whole job is to be the same idea wearing different clothes: hovering
+   opens it up, a tap breaks it into grains and reassembles it as something
+   else, and choosing a field turns it into the shape that field would give
+   an idea. One idea, many forms.
+
+   A .glb can still drive the seed shape if you want one — drop it at
+   model/logo.glb and flip USE_MODEL to true. Everything downstream (the
+   grains, the reveal, the field shapes) works off whatever geometry the
+   seed happens to be. */
+const USE_MODEL = false;              // true → seed the cycle from model/logo.glb instead
+const MODEL_URL = 'model/logo.glb';
 const FIT = 3.0;                      // on-screen height of the form, world units
 const BACK_Z = -6;
 
@@ -794,21 +838,98 @@ const uPR = { value: 0 };
 const uPI = { value: 0 };
 const uKeyC = { value: new THREE.Color(TH().key) };
 
+/* how far open the form is — 0 solid, 1 the interior on show. Driven by hover
+   (and by a held touch on a phone, which has no hover to give). */
+const uReveal = { value: 0 };
+
+/* which behaviour the current shape is living out, and how far it has faded in.
+   uP.x carries one number the shape needs (the bar pitch, for the visualiser);
+   uBBmin/uBBmax are the shape's own bounds, so the warp maths below can work in
+   the shape's units instead of guessing at them. */
+const uT      = { value: 0 };
+const uLive   = { value: 0 };
+const uLiveK  = { value: 0 };
+const uP      = { value: new THREE.Vector4(0.3, 0, 0, 0) };
+const uBBmin  = { value: new THREE.Vector3(-1,-1,-1) };
+const uBBmax  = { value: new THREE.Vector3( 1, 1, 1) };
+
+/* Every shape is one geometry, so its behaviour has to be readable from a
+   vertex's own position — nothing is indexed, nothing is tagged. That is a
+   constraint worth having: it means the outline and the wireframe, which the
+   edge extractor rebuilds from scratch and strips of every attribute, move in
+   exactly the same way as the solid they belong to. */
+const LIVE_WARP = `
+uniform float uT;
+uniform int   uLive;
+uniform float uLiveK;
+uniform vec4  uP;
+uniform vec3  uBBmin;
+uniform vec3  uBBmax;
+vec2 kfRot(vec2 v, float a){ float c = cos(a), s = sin(a); return vec2(v.x*c - v.y*s, v.x*s + v.y*c); }
+vec3 kfLive(vec3 p){
+  float k = uLiveK;
+  if(k < 0.001) return p;
+  float uTL = uT - uP.y;                // seconds since this shape was put on
+  if(uLive == 1){                       // a mark — the construction grid turns on itself
+    float r = length(p.xy);
+    p.xy = kfRot(p.xy, k * 0.42 * sin(uTL*0.5) * (0.3 + r*0.9));
+  }else if(uLive == 2){                 // a sheet — paper that has not settled
+    float w = smoothstep(uBBmin.x, uBBmax.x, p.x);
+    p.z += k * 0.16 * sin(p.y*1.9 + uTL*1.15) * w;
+    p.x += k * 0.04 * sin(p.y*1.3 - uTL*0.85);
+  }else if(uLive == 3){                 // mass — turning on the wheel, still wet
+    p.xz = kfRot(p.xz, k * uTL * 0.5);
+    p   *= 1.0 + k * 0.028 * sin(p.y*3.6 + uTL*1.35);
+  }else if(uLive == 4){                 // space — shells breathing apart
+    float shell = max(abs(p.x), max(abs(p.y), abs(p.z)));
+    p *= 1.0 + k * 0.085 * sin(uTL*1.25 - shell*3.6);
+  }else if(uLive == 5){                 // signal — the bars read something we cannot hear
+    float base = uBBmin.y;
+    float col  = floor((p.x - uBBmin.x) / max(0.0001, uP.x));
+    float a1   = sin(uTL*2.7 + col*0.83);
+    float a2   = cos(uTL*1.13 + col*0.37);
+    float a3   = sin(uTL*4.3 - col*1.6) * 0.35;
+    float amp  = mix(0.22, 1.72, clamp((a1*a2 + a3)*0.5 + 0.5, 0.0, 1.0));
+    float h    = p.y - base;
+    // the mask starts above the baseline slab and the feet of the bars, so the
+    // rail stays put and each bar stretches from its own foot rather than
+    // sliding bodily up and down
+    p.y = base + h * mix(1.0, amp, k * smoothstep(0.12, 0.34, h));
+  }else if(uLive == 6){                 // structure — the truss shears about its axis
+    p.xz = kfRot(p.xz, k * 0.34 * sin(uTL*0.9 + p.y*1.5));
+  }else if(uLive == 7){                 // sequence — a pulse climbing the spiral
+    float t = (p.y - uBBmin.y) / max(0.0001, uBBmax.y - uBBmin.y);
+    p.xz *= 1.0 + k * 0.20 * sin(uTL*2.2 - t*7.0);
+  }else if(uLive == 8){                 // fragments — plates sliding out of register
+    float lay = floor((p.y - uBBmin.y) * 3.4);
+    p.x += k * 0.16 * sin(uTL*1.1 + lay*1.7);
+    p.z += k * 0.16 * cos(uTL*0.9 + lay*2.3);
+  }
+  return p;
+}
+`;
+
 function zoneify(mat, mode2){
   mat.transparent = true;
   mat.onBeforeCompile = (sh)=>{
     sh.uniforms.uC = uC; sh.uniforms.uR1 = uR1; sh.uniforms.uR2 = uR2;
     sh.uniforms.uPC = uPC; sh.uniforms.uPR = uPR; sh.uniforms.uPI = uPI;
-    sh.uniforms.uKeyC = uKeyC;
-    sh.vertexShader = 'varying vec3 vWP;\nvarying vec3 vOP;\n' + sh.vertexShader.replace(
+    sh.uniforms.uKeyC = uKeyC; sh.uniforms.uReveal = uReveal;
+    sh.uniforms.uT = uT; sh.uniforms.uLive = uLive; sh.uniforms.uLiveK = uLiveK;
+    sh.uniforms.uP = uP; sh.uniforms.uBBmin = uBBmin; sh.uniforms.uBBmax = uBBmax;
+    sh.vertexShader = 'varying vec3 vWP;\nvarying vec3 vOP;\n' + LIVE_WARP + sh.vertexShader.replace(
       '#include <project_vertex>',
-      '#include <project_vertex>\n  vWP = (modelMatrix * vec4(transformed, 1.0)).xyz;\n  vOP = transformed;'
+      '  transformed = kfLive(transformed);\n  #include <project_vertex>\n' +
+      '  vWP = (modelMatrix * vec4(transformed, 1.0)).xyz;\n  vOP = transformed;'
     );
+    // hovering does not just brighten the lens — it thins the shell everywhere
+    // and brings the wireframe up over the whole form, so what you get is the
+    // structure of the thing rather than a lit patch of its surface
     const band = mode2 === 'in'
       ? 'a = 1.0 - smoothstep(uR1 - 0.13, uR1 + 0.13, d);'
       : mode2 === 'out'
-        ? 'a = smoothstep(uR1 - 0.13, uR1 + 0.13, d);'
-        : 'a = smoothstep(uR1 - 0.16, uR1 + 0.10, d) * (1.0 - smoothstep(uR2 - 0.16, uR2 + 0.16, d));';
+        ? 'a = smoothstep(uR1 - 0.13, uR1 + 0.13, d) * (1.0 - 0.62*uReveal);'
+        : 'a = max(smoothstep(uR1 - 0.16, uR1 + 0.10, d) * (1.0 - smoothstep(uR2 - 0.16, uR2 + 0.16, d)), uReveal*0.72);';
     const wave =
       '\n  float pd = distance(vOP, uPC);' +
       '\n  float ring = exp(-pow((pd - uPR) / 0.21, 2.0)) * uPI;' +
@@ -817,7 +938,7 @@ function zoneify(mat, mode2){
       '\n  diffuseColor.rgb = mix(diffuseColor.rgb, uKeyC, clamp(ring * 1.25, 0.0, 1.0));';
     sh.fragmentShader =
       'varying vec3 vWP;\nvarying vec3 vOP;\nuniform vec3 uC;\nuniform float uR1;\nuniform float uR2;\n' +
-      'uniform vec3 uPC;\nuniform float uPR;\nuniform float uPI;\nuniform vec3 uKeyC;\n' + sh.fragmentShader.replace(
+      'uniform vec3 uPC;\nuniform float uPR;\nuniform float uPI;\nuniform vec3 uKeyC;\nuniform float uReveal;\n' + sh.fragmentShader.replace(
       '#include <color_fragment>',
       '#include <color_fragment>' +
       // the lens is a circle on the glass, not a ball in the world. Measuring
@@ -915,7 +1036,11 @@ function updateField(ease, t, waveC, waveR, waveI){
 const group = new THREE.Group();
 scene.add(group);
 
-function normalize(geo){
+// every shape is centred and brought to the same height, so the cycle reads as
+// one thing changing rather than a slideshow of differently sized objects.
+// Only the seed is allowed to set the framing — otherwise the camera would
+// lurch every time a wide shape (the visualiser) followed a tall one (the sheet).
+function normalize(geo, setFrame){
   geo.computeBoundingBox();
   const size = geo.boundingBox.getSize(new THREE.Vector3());
   const mid  = geo.boundingBox.getCenter(new THREE.Vector3());
@@ -924,7 +1049,7 @@ function normalize(geo){
   geo.scale(k,k,k);
   geo.computeBoundingBox(); geo.computeBoundingSphere();
   const fitted = geo.boundingBox.getSize(new THREE.Vector3());
-  letterW = fitted.x; letterH = fitted.y;
+  if(setFrame){ letterW = Math.max(fitted.x, 2.6); letterH = Math.max(fitted.y, FIT); }
   return geo;
 }
 
@@ -955,35 +1080,420 @@ function svgFallback(){
   return g;
 }
 
-let matte, glass, outline, wire, ready = false;
 
-function build(geo){
-  normalize(geo);
-  letterGeo = geo;
+/* ══ the shape library ════════════════════════════════════════════════════
+   Nine shapes, all built here rather than loaded, all normalised to the same
+   height so the cycle never lurches. None of them is a picture of anything:
+   the mark is a construction grid, not a logo; the sheet is a layout, not a
+   poster; the sculpture is a turned mass, not a figure. They are what an idea
+   looks like once a particular medium has had its way with it.
+
+   Every builder returns raw geometry. Bounds, edges, wireframe and the cloud
+   of grains are derived once, on first use, and kept. */
+
+// a thin bar between two points — the unit every truss here is made of
+function strut(a, b, r){
+  const dir = new THREE.Vector3().subVectors(b, a);
+  const len = dir.length();
+  if(len < 1e-5) return null;
+  const g = new THREE.BoxGeometry(r, len, r);
+  const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), dir.clone().normalize());
+  g.applyMatrix4(new THREE.Matrix4().compose(
+    new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5), q, new THREE.Vector3(1,1,1)));
+  return g;
+}
+
+// every distinct edge of a triangle soup, de-duplicated on rounded coordinates
+function edgeList(geo){
+  const pos = geo.index ? geo.toNonIndexed().attributes.position : geo.attributes.position;
+  const seen = new Set(), out = [];
+  const k = v => Math.round(v*1000)/1000;
+  const key = (x,y,z)=> k(x)+','+k(y)+','+k(z);
+  const A = new THREE.Vector3(), B = new THREE.Vector3();
+  for(let i=0;i<pos.count;i+=3){
+    for(let e=0;e<3;e++){
+      A.fromBufferAttribute(pos, i+e);
+      B.fromBufferAttribute(pos, i+((e+1)%3));
+      const ka = key(A.x,A.y,A.z), kb = key(B.x,B.y,B.z);
+      const id = ka < kb ? ka+'|'+kb : kb+'|'+ka;
+      if(seen.has(id)) continue;
+      seen.add(id);
+      out.push([A.clone(), B.clone()]);
+    }
+  }
+  return out;
+}
+
+function joinAll(list){
+  const parts = list.filter(Boolean).map(g => g.index ? g.toNonIndexed() : g);
+  parts.forEach(g=>{
+    for(const key of Object.keys(g.attributes)) if(key !== 'position' && key !== 'normal') g.deleteAttribute(key);
+    if(!g.attributes.normal) g.computeVertexNormals();
+  });
+  if(!parts.length) return new THREE.BoxGeometry(1,1,1);
+  return parts.length === 1 ? parts[0] : BufferGeometryUtils.mergeGeometries(parts, false);
+}
+
+const place = (g, x, y, z, rx, ry, rz)=>{
+  if(rx) g.rotateX(rx); if(ry) g.rotateY(ry); if(rz) g.rotateZ(rz);
+  g.translate(x||0, y||0, z||0);
+  return g;
+};
+
+/* ── SEED ─────────────────────────────────────────────────────────────────
+   The resting state. A closed shell folded by two harmonics and given a slow
+   twist, so it reads as carved rather than generated, and has no side you
+   could call its front. Coarse enough on purpose: at this density the
+   wireframe that hover brings up is legible structure, not a grey haze. */
+function formSeed(){
+  const g = new THREE.SphereGeometry(1, 44, 26);
+  const pos = g.attributes.position;
+  const v = new THREE.Vector3();
+  for(let i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos, i);
+    const th = Math.atan2(v.z, v.x);
+    const ph = Math.acos(THREE.MathUtils.clamp(v.y, -1, 1));
+    const r = 1
+      + 0.21 * Math.sin(3*th) * Math.sin(2*ph)
+      + 0.14 * Math.cos(2*ph + 1.1)
+      - 0.09 * Math.sin(5*ph) * Math.cos(2*th);
+    v.multiplyScalar(r);
+    const tw = v.y * 0.55;                        // the twist that keeps it nameless
+    const c = Math.cos(tw), sn = Math.sin(tw);
+    const x = v.x*c - v.z*sn, z = v.x*sn + v.z*c;
+    pos.setXYZ(i, x*1.02, v.y*1.24, z*0.86);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
+/* ── LOGO ─ a mark, and the grid it was drawn on ──────────────────────────
+   What a logo actually is before it is a logo: circles, a rule, a division of
+   the square. The construction stays visible, which is the honest version. */
+function formLogo(){
+  const parts = [];
+  // the wireframe this generates is what hover puts on show, so the ring
+  // tessellation is kept only as fine as a circle needs to read as a circle
+  [1.45, 1.02, 0.66].forEach((r, i)=>
+    parts.push(new THREE.TorusGeometry(r, i === 1 ? 0.028 : 0.019, 5, 56)));
+  parts.push(new THREE.TorusGeometry(1.02, 0.115, 8, 48, Math.PI*1.22));    // the bold stroke
+  parts.push(place(new THREE.TorusGeometry(0.66, 0.085, 7, 34, Math.PI*0.7), 0,0,0, 0,0, Math.PI*0.85));
+  parts.push(place(new THREE.CylinderGeometry(0.2, 0.2, 0.16, 26), 0, 0, 0, Math.PI/2));
+  for(let i=0;i<4;i++){                                                      // the drawing rules
+    parts.push(place(new THREE.BoxGeometry(3.1, 0.014, 0.014), 0,0,0, 0,0, i*Math.PI/4));
+  }
+  [[-1.45,-1.45],[1.45,-1.45],[-1.45,1.45],[1.45,1.45]].forEach(([x,y])=>
+    parts.push(place(new THREE.BoxGeometry(0.3, 0.014, 0.014), x, y, 0)) );
+  const g = joinAll(parts);
+  g.scale(1, 1, 1.6);                            // a mark has a face; give it just enough body
+  return g;
+}
+
+/* ── POSTER ─ a sheet with a layout pressed into it ───────────────────────
+   Portrait, thin, and the blocks stand a little proud of the paper so the
+   hierarchy survives being seen edge-on. */
+function formPoster(){
+  const W = 2.05, H = 2.92, T = 0.075;
+  const parts = [new THREE.BoxGeometry(W, H, T)];
+  const block = (x, y, w, h, d)=> parts.push(place(new THREE.BoxGeometry(w, h, d), x, y, (T + d)/2));
+  block(-0.12, 1.02, 1.5, 0.30, 0.13);                        // headline
+  block(-0.42, 0.66, 0.9, 0.09, 0.075);
+  for(let i=0;i<5;i++) block(-0.30 + (i%2)*0.09, 0.30 - i*0.145, 1.05 - (i%3)*0.28, 0.05, 0.06);
+  block(0.16, -0.62, 1.35, 1.02, 0.17);                        // the image
+  block(-0.60, -1.30, 0.68, 0.06, 0.06);
+  block(-0.72, -1.42, 0.44, 0.06, 0.06);
+  parts.push(place(new THREE.BoxGeometry(W - 0.24, 0.014, 0.05), 0, 1.28, T/2 + 0.025));
+  return joinAll(parts);
+}
+
+/* ── 3D ─ mass on the wheel ───────────────────────────────────────────────
+   A turned profile, twisted off-axis, standing on a plinth: sculpting, which
+   is subtraction and revolution before it is anything else. */
+function formSculpt(){
+  const prof = [
+    [0.00, -1.30],[0.62, -1.30],[0.66, -1.16],[0.44, -1.02],[0.40, -0.72],
+    [0.56, -0.40],[0.62,  0.02],[0.47,  0.34],[0.30,  0.52],[0.36,  0.78],
+    [0.30,  1.06],[0.16,  1.22],[0.00,  1.30]
+  ].map(([x,y])=>new THREE.Vector2(x, y));
+  const body = new THREE.LatheGeometry(prof, 56);
+  const pos = body.attributes.position, v = new THREE.Vector3();
+  for(let i=0;i<pos.count;i++){                    // a twist, and a chisel down one flank
+    v.fromBufferAttribute(pos, i);
+    const a = v.y * 0.62;
+    const c = Math.cos(a), sn = Math.sin(a);
+    let x = v.x*c - v.z*sn, z = v.x*sn + v.z*c;
+    const cut = 1 - 0.16 * Math.max(0, Math.cos(Math.atan2(z, x) - 0.9));
+    pos.setXYZ(i, x*cut, v.y, z*cut*0.88);
+  }
+  body.computeVertexNormals();
+  const parts = [body];
+  parts.push(place(new THREE.BoxGeometry(1.24, 0.10, 1.24), 0, -1.36, 0));
+  parts.push(place(new THREE.BoxGeometry(1.05, 0.07, 1.05), 0, -1.45, 0));
+  return joinAll(parts);
+}
+
+/* ── XR ─ a space you could stand inside ──────────────────────────────────
+   Nested shells, corner brackets, a tracked point. Not a headset — the thing
+   a headset is for: registered volume. */
+function formXR(){
+  const parts = [];
+  const frame = (h, r)=>{
+    const c = [];
+    for(const sx of [-1,1]) for(const sy of [-1,1]) for(const sz of [-1,1])
+      c.push(new THREE.Vector3(sx*h, sy*h, sz*h));
+    for(let i=0;i<8;i++) for(let j=i+1;j<8;j++){
+      const d = c[i].distanceTo(c[j]);
+      if(Math.abs(d - 2*h) < 1e-4) parts.push(strut(c[i], c[j], r));
+    }
+  };
+  frame(1.32, 0.030);
+  frame(0.92, 0.021);
+  frame(0.52, 0.015);
+  parts.push(place(new THREE.BoxGeometry(1.9, 0.012, 1.9), 0, -0.02, 0));     // the ground plane
+  parts.push(new THREE.OctahedronGeometry(0.17, 0));                           // the tracked point
+  for(const ax of [0,1,2]){                                                    // its axes
+    const g = new THREE.BoxGeometry(0.9, 0.010, 0.010);
+    parts.push(ax === 1 ? place(g,0,0,0,0,0,Math.PI/2) : ax === 2 ? place(g,0,0,0,0,Math.PI/2,0) : g);
+  }
+  for(const sx of [-1,1]) for(const sy of [-1,1]){                             // corner brackets
+    parts.push(place(new THREE.BoxGeometry(0.40, 0.035, 0.035), sx*1.12, sy*1.32, 1.32));
+    parts.push(place(new THREE.BoxGeometry(0.035, 0.40, 0.035), sx*1.32, sy*1.12, 1.32));
+  }
+  return joinAll(parts);
+}
+
+/* ── MOTION ─ the idea keeping time ───────────────────────────────────────
+   Bars on a baseline. Standing still they are a bar chart; the shader gives
+   them the only thing that makes them motion, which is time. The baseline
+   spans the full width so the pitch the shader reads back from the bounds is
+   exactly the pitch the bars were laid out on. */
+const MOTION_COLS = 13;
+function formMotion(){
+  // normalising scales by the larger of width and height, so a row that is much
+  // wider than it is tall arrives on screen much smaller than every other shape.
+  // Fewer, taller columns keep it the same size as the rest of the cycle.
+  const pitch = 0.22, span = MOTION_COLS * pitch, base = -1.42;
+  const parts = [place(new THREE.BoxGeometry(span, 0.09, 0.34), 0, base + 0.045, 0)];
+  for(let i=0;i<MOTION_COLS;i++){
+    const t = i/(MOTION_COLS-1);
+    const h = 0.62 + 1.82 * Math.pow(Math.sin(t*Math.PI), 0.75) * (0.6 + 0.4*Math.sin(i*2.1));
+    parts.push(place(new THREE.BoxGeometry(pitch*0.58, h, 0.26),
+      -span/2 + pitch*(i + 0.5), base + 0.09 + h/2, 0));
+  }
+  return joinAll(parts);
+}
+
+/* ── the interludes ───────────────────────────────────────────────────────
+   Where a tap goes on its way somewhere else: pure structure, held for a
+   beat, then handed back. */
+function formLattice(){
+  const edges = edgeList(new THREE.IcosahedronGeometry(1.28, 1));
+  const parts = edges.map(([a,b])=>strut(a, b, 0.030));
+  edges.forEach(([a], i)=>{
+    if(i % 7 === 0) parts.push(place(new THREE.OctahedronGeometry(0.075, 0), a.x, a.y, a.z));
+  });
+  parts.push(new THREE.IcosahedronGeometry(0.34, 0));
+  return joinAll(parts);
+}
+
+function formHelix(){
+  const parts = [];
+  const N = 46, turns = 2.6, H = 2.7;
+  for(let i=0;i<N;i++){
+    const t = i/(N-1), a = t*Math.PI*2*turns, y = -H/2 + t*H;
+    const r = 0.55 + 0.42*Math.sin(t*Math.PI);
+    const b = new THREE.BoxGeometry(0.30, 0.09, 0.09);
+    b.rotateY(-a);
+    b.translate(Math.cos(a)*r, y, Math.sin(a)*r);
+    parts.push(b);
+  }
+  parts.push(place(new THREE.CylinderGeometry(0.035, 0.035, H, 12), 0, 0, 0));
+  return joinAll(parts);
+}
+
+function formShards(){
+  const parts = [];
+  const r = mulberry32(20260815);
+  for(let i=0;i<9;i++){
+    const t = i/8;
+    const w = 0.70 + 1.35*Math.sin(t*Math.PI);
+    const g = new THREE.BoxGeometry(w, 0.16, w*0.72);
+    g.rotateY(r()*0.9 - 0.45);
+    g.translate((r()-0.5)*0.5, -1.25 + t*2.5, (r()-0.5)*0.4);
+    parts.push(g);
+  }
+  return joinAll(parts);
+}
+
+/* Each entry: how to build it, which behaviour it lives out, and the line the
+   caption shows — the caption is the argument, so it is part of the data. */
+const FORM_DEFS = {
+  SEED:    { build: formSeed,    live: 0, tag: 'FORM 00',  line: 'an idea, before it has taken a shape' },
+  LOGO:    { build: formLogo,    live: 1, tag: 'AS A MARK', line: 'circles, a rule, and what survives them' },
+  POSTER:  { build: formPoster,  live: 2, tag: 'AS A SHEET', line: 'the same idea, given a hierarchy' },
+  SCULPT:  { build: formSculpt,  live: 3, tag: 'AS A MASS', line: 'turned on the wheel, cut back to itself' },
+  XR:      { build: formXR,      live: 4, tag: 'AS A SPACE', line: 'registered to a volume you can stand in' },
+  MOTION:  { build: formMotion,  live: 5, tag: 'AS A SIGNAL', line: 'the same idea, keeping time' },
+  LATTICE: { build: formLattice, live: 6, tag: 'AS STRUCTURE', line: 'stripped back to how it holds together' },
+  HELIX:   { build: formHelix,   live: 7, tag: 'AS SEQUENCE', line: 'one move, repeated until it climbs' },
+  SHARDS:  { build: formShards,  live: 8, tag: 'AS FRAGMENTS', line: 'in pieces, and still the same idea' }
+};
+const INTERLUDES = ['LATTICE', 'HELIX', 'SHARDS'];
+
+// whatever the fields are called in content.json, they land on one of these
+function formForField(key){
+  const k = String(key || '').toLowerCase();
+  if(/logo|brand|mark|identity/.test(k)) return 'LOGO';
+  if(/poster|print|editorial|graphic|type/.test(k)) return 'POSTER';
+  if(/motion|anim|video|film|title/.test(k)) return 'MOTION';
+  if(/3d|three|sculpt|cgi|render|model/.test(k)) return 'SCULPT';
+  if(/xr|\bar\b|\bvr\b|spatial|immersive|realit/.test(k)) return 'XR';
+  return null;
+}
+
+let matte, glass, outline, wire, core, ready = false;
+
+/* ── the interior ─────────────────────────────────────────────────────────
+   One armature, shared by every shape and scaled to fit it. Hover fades it up
+   through the thinning shell: a frame, three great circles and a nucleus —
+   enough to say "this has an inside" without pretending to be an X-ray of a
+   shape that changes every few seconds. */
+function circleLine(r, seg, axis){
+  const pts = [];
+  for(let i=0;i<seg;i++){
+    const a0 = i/seg*Math.PI*2, a1 = (i+1)/seg*Math.PI*2;
+    const P = a => axis === 0 ? [0, Math.cos(a)*r, Math.sin(a)*r]
+              : axis === 1 ? [Math.cos(a)*r, 0, Math.sin(a)*r]
+              :              [Math.cos(a)*r, Math.sin(a)*r, 0];
+    pts.push(...P(a0), ...P(a1));
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pts), 3));
+  return g;
+}
+
+function buildCoreGeo(){
+  const parts = [ new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(0.60, 1)) ];
+  for(const ax of [0,1,2]) parts.push(circleLine(0.88, 60, ax));
+  const ax = [];
+  for(const [a,b] of [[[-1,0,0],[1,0,0]],[[0,-1,0],[0,1,0]],[[0,0,-1],[0,0,1]]])
+    ax.push(a[0]*1.06, a[1]*1.06, a[2]*1.06, b[0]*1.06, b[1]*1.06, b[2]*1.06);
+  const axg = new THREE.BufferGeometry();
+  axg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(ax), 3));
+  parts.push(axg);
+  return BufferGeometryUtils.mergeGeometries(parts, false);
+}
+
+/* ── the registry ─────────────────────────────────────────────────────────
+   Geometry, its edges, its wireframe and its bounds are cut once per shape and
+   kept. The grains are cut lazily, because a shape you never visit should
+   never cost you a sampler run. */
+const formCache = {};
+
+function ensureForm(key){
+  if(formCache[key]) return formCache[key];
+  const def = FORM_DEFS[key] || FORM_DEFS.SEED;
+  let raw = def.build();
+  // the surface sampler converts indexed geometry itself, once per call and
+  // with a warning each time — doing it here means it happens once, quietly
+  if(raw.index) raw = raw.toNonIndexed();
+  const geo = normalize(raw, key === 'SEED');
+  const bb = geo.boundingBox.clone();
+  const F = {
+    key, def, geo, bb,
+    edges: new THREE.EdgesGeometry(geo, 24),
+    wireGeo: new THREE.WireframeGeometry(geo),
+    // the visualiser needs to read its own column pitch back off its bounds
+    pitch: key === 'MOTION' ? (bb.max.x - bb.min.x) / MOTION_COLS : 0.3,
+    radius: geo.boundingSphere ? geo.boundingSphere.radius : 1.8,
+    cloud: null
+  };
+  formCache[key] = F;
+  return F;
+}
+
+let curForm = 'SEED';
+
+// hand the rig a different shape: geometry, edges, wireframe, the numbers the
+// warp needs, and the interior scaled to match
+function wearForm(key){
+  const F = ensureForm(key);
+  matte.geometry = F.geo;
+  glass.geometry = F.geo;
+  outline.geometry = F.edges;
+  wire.geometry = F.wireGeo;
+  uLive.value = F.def.live;
+  uP.value.x = F.pitch;
+  uP.value.y = liveT;              // this shape's behaviour starts from zero
+  uBBmin.value.copy(F.bb.min);
+  uBBmax.value.copy(F.bb.max);
+  core.scale.setScalar(F.radius * 0.62);
+  nucleus.scale.setScalar(F.radius * 0.34);
+  curForm = key;
+  liveK = 0;                       // the new behaviour eases in rather than snapping on
+  setCaption(F.def);
+}
+
+let nucleus = null;
+
+/* ── caption ──────────────────────────────────────────────────────────────
+   The label under the form. It swaps at the point in the morph where the old
+   solid has gone and the new one has not arrived, so the words change in the
+   same beat as the shape rather than a moment ahead of it. */
+const capEl = document.getElementById('formcap');
+const capTag = document.getElementById('captag');
+const capLine = document.getElementById('capline');
+const triOut = document.getElementById('tri');
+
+function setCaption(def){
+  if(!capEl || !def) return;
+  capEl.classList.add('swap');
+  setTimeout(()=>{
+    capTag.textContent = def.tag;
+    capLine.textContent = def.line;
+    capEl.classList.remove('swap');
+  }, 160);
+  if(triOut && matte && matte.geometry){
+    const n = Math.round(matte.geometry.attributes.position.count / 3);
+    triOut.textContent = n.toLocaleString('en-US') + ' TRI / ' + def.tag.replace(/^AS (A |AN )?/, '');
+  }
+}
+
+// the caption follows the bottom of the form rather than the bottom of the screen
+function placeCaption(){
+  if(!capEl || !visH) return;
+  const worldBottom = centreY - letterH*0.52 - 0.30;
+  const py = VY + VH/2 - worldBottom * (VH / visH);
+  const floor = VY + VH - (stacked() ? 168 : 118);
+  capEl.style.top = Math.round(Math.max(VY + VH*0.42, Math.min(floor, py))) + 'px';
+}
+
+function buildRig(){
   const T = TH();
+  const F = ensureForm('SEED');
 
-  matte = new THREE.Mesh(geo, zoneify(new THREE.MeshStandardMaterial({
+  matte = new THREE.Mesh(F.geo, zoneify(new THREE.MeshStandardMaterial({
     color:T.matte, roughness:T.matteRough, metalness:T.matteMetal, envMapIntensity:1.15
   }), 'out'));
   matte.renderOrder = 1;
   group.add(matte);
 
-  outline = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 20), new THREE.LineBasicMaterial({
+  outline = new THREE.LineSegments(F.edges, new THREE.LineBasicMaterial({
     color:T.line, transparent:true, opacity:T.lineOp, depthWrite:false
   }));
   outline.scale.setScalar(1.002);
   outline.renderOrder = 2;
   group.add(outline);
 
-  wire = new THREE.LineSegments(new THREE.WireframeGeometry(geo), zoneify(new THREE.LineBasicMaterial({
+  wire = new THREE.LineSegments(F.wireGeo, zoneify(new THREE.LineBasicMaterial({
     color:T.line, depthWrite:false
   }), 'band'));
   wire.scale.setScalar(1.006);
   wire.renderOrder = 3;
   group.add(wire);
 
-  const depth = geo.boundingBox.getSize(new THREE.Vector3()).z;
-  glass = new THREE.Mesh(geo, zoneify(new THREE.MeshPhysicalMaterial({
+  const depth = F.bb.getSize(new THREE.Vector3()).z;
+  glass = new THREE.Mesh(F.geo, zoneify(new THREE.MeshPhysicalMaterial({
     color:0xffffff, metalness:0, roughness:0.02, transmission:1,
     thickness:Math.max(depth,0.6), ior:1.6, clearcoat:1, clearcoatRoughness:0.02,
     iridescence:0.3, iridescenceIOR:1.28, iridescenceThicknessRange:[180,420],
@@ -997,10 +1507,41 @@ function build(geo){
   glass.renderOrder = 4;
   group.add(glass);
 
+  core = new THREE.LineSegments(buildCoreGeo(), new THREE.LineBasicMaterial({
+    color:T.line, transparent:true, opacity:0, depthWrite:false, depthTest:false
+  }));
+  core.renderOrder = 5;
+  core.visible = false;
+  group.add(core);
+
+  nucleus = new THREE.Mesh(new THREE.IcosahedronGeometry(0.5, 0), new THREE.MeshStandardMaterial({
+    color:T.key, roughness:0.22, metalness:0.65, transparent:true, opacity:0, depthWrite:false
+  }));
+  nucleus.renderOrder = 5;
+  nucleus.visible = false;
+  group.add(nucleus);
+
+  wearForm('SEED');
   ready = true;
   try{ resize(); }catch(e){}     // refit now that the real proportions are known
   // the grains are only needed on the first tap, so they can wait a couple of frames
   setTimeout(()=>{ try{ buildDust(); }catch(e){} }, 90);
+  setTimeout(prewarmForms, 1400);
+}
+
+// the shapes nobody has asked for yet are cut during idle time, one per slice,
+// so the first visit to a field is a morph and not a stutter
+function prewarmForms(){
+  const queue = Object.keys(FORM_DEFS).filter(k => !formCache[k] || !formCache[k].cloud);
+  const idle = window.requestIdleCallback || (fn => setTimeout(()=>fn({timeRemaining:()=>8}), 60));
+  (function step(){
+    const k = queue.shift();
+    if(!k) return;
+    idle(()=>{
+      try{ ensureCloud(k); }catch(e){}
+      step();
+    });
+  })();
 }
 
 const boot = document.getElementById('boot');
@@ -1008,19 +1549,26 @@ const bootmsg = document.getElementById('bootmsg');
 const bootfill = document.getElementById('bootfill');
 const bootpct = document.getElementById('bootpct');
 
-new GLTFLoader().load(
-  MODEL_URL,
-  gltf=>{
-    const geo = flatten(gltf.scene);
-    if(geo) build(geo);
-    else { bootmsg.textContent = 'FALLBACK GEOMETRY'; build(svgFallback()); }
-  },
-  undefined,
-  ()=>{
-    bootmsg.textContent = 'FALLBACK GEOMETRY';
-    build(svgFallback());
-  }
-);
+/* The seed is built in code by default — nothing here stands for a name. Point
+   USE_MODEL at a .glb and that geometry becomes the seed instead; every other
+   shape, and the whole cycle, carries on unchanged around it. */
+if(USE_MODEL){
+  new GLTFLoader().load(
+    MODEL_URL,
+    gltf=>{
+      const geo = flatten(gltf.scene);
+      if(geo) FORM_DEFS.SEED.build = ()=>geo;
+      else bootmsg.textContent = 'PROCEDURAL SEED';
+      buildRig();
+    },
+    undefined,
+    ()=>{ bootmsg.textContent = 'PROCEDURAL SEED'; buildRig(); }
+  );
+}else{
+  // the rig reaches for the viewport numbers and stacked(), both declared
+  // further down this module — a microtask lets the module finish first
+  Promise.resolve().then(buildRig);
+}
 
 
 /* ══ dust: the letter comes apart and puts itself back together ═══════════
@@ -1037,10 +1585,12 @@ new GLTFLoader().load(
 const PN = reduce ? 3200 : (coarse ? 5200 : 9000);
 const MORPH_T = reduce ? 0.85 : 1.35;
 
-let letterGeo = null, formFade = 1;
-let cloudA = null, cloudB = null, pairAB = null;
+let formFade = 1;
 let dust = null, dustMat = null, dustReady = false;
-let morph = null, queued = 0;
+let morph = null, mQueue = [], hold = 0, interIx = 0;
+let homeForm = 'SEED';        // where a tap comes back to: the seed, or the field in hand
+let liveK = 0;                // how far the current shape's behaviour has faded in
+let reveal = 0;               // how far open the shell is
 
 function sstep(x){
   x = Math.min(1, Math.max(0, x));
@@ -1168,7 +1718,7 @@ function dustColor(){
 }
 
 function buildDust(){
-  if(dustReady || dust || !ready || !letterGeo) return;
+  if(dustReady || dust || !ready) return;
 
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(PN*3), 3));
@@ -1197,23 +1747,25 @@ function buildDust(){
   dust.visible = false;
   group.add(dust);
 
-  // sampling and pairing are chunked so the frames right after boot stay smooth
-  const jobs = [
-    ()=>{ cloudA = sampleCloud(letterGeo, 9001); },
-    ()=>{ cloudB = sampleCloud(letterGeo, 4703); },
-    ()=>{ pairAB = kdPair(cloudA.pos, cloudB.pos); },
-    ()=>{
-      dustReady = true;
-      sizeDust(); syncDust();
-      if(queued){ queued = 0; startMorph(null); }   // a tap that beat the grains here
-    }
-  ];
-  (function next(){
-    const job = jobs.shift();
-    if(!job) return;
-    try{ job(); }catch(e){ return; }
-    setTimeout(next, 0);
-  })();
+  // the seed's grains are cut straight away — it is the one shape a first tap
+  // is guaranteed to be leaving from
+  setTimeout(()=>{
+    try{ ensureCloud('SEED'); }catch(e){}
+    dustReady = true;
+    sizeDust(); syncDust();
+    pumpMorph();                      // a tap that beat the grains here
+  }, 0);
+}
+
+// grains for a shape are cut on first use and kept
+function ensureCloud(key){
+  const F = ensureForm(key);
+  if(!F.cloud){
+    let seed = 7919;
+    for(let i=0;i<key.length;i++) seed = (seed*31 + key.charCodeAt(i)) >>> 0;
+    F.cloud = sampleCloud(F.geo, seed);
+  }
+  return F.cloud;
 }
 
 function syncDust(){
@@ -1227,14 +1779,29 @@ function sizeDust(){
   if(dustMat) dustMat.uniforms.uPx.value = VH * DPR / (2*Math.tan(FOV*Math.PI/360));
 }
 
-function armDust(hit){
-  if(!dust || !cloudA || !cloudB || !pairAB) return false;
+/* ── the cycle ─────────────────────────────────────────────────────────────
+   A hop is: sample the shape you are wearing, sample the one you are going to,
+   pair the two clouds so each grain has a place waiting for it, then fly. The
+   solid lets go early and the new solid is back before the grains have settled,
+   so the swap itself is never visible — what you see is one mass becoming
+   another, not a cut between two objects.
+
+   Hops queue. A tap books two of them (out to a structure, hold, back), and
+   choosing a field books one. Anything booked while a hop is in flight waits
+   its turn rather than interrupting, which is what keeps rapid tapping from
+   tearing the form in half. */
+
+function armDust(fromKey, toKey, hit){
+  if(!dust) return false;
+  const A = ensureCloud(fromKey), B = ensureCloud(toKey);
+  if(!A || !B) return false;
+  const pair = kdPair(A.pos, B.pos);
   const g = dust.geometry;
   const p = g.attributes.position.array, t = g.attributes.aTo.array, n = g.attributes.aNrm.array;
-  p.set(cloudA.pos); n.set(cloudA.nrm);
+  p.set(A.pos); n.set(A.nrm);
   for(let i=0;i<PN;i++){
-    const j = pairAB[i]*3, o = i*3;
-    t[o] = cloudB.pos[j]; t[o+1] = cloudB.pos[j+1]; t[o+2] = cloudB.pos[j+2];
+    const j = pair[i]*3, o = i*3;
+    t[o] = B.pos[j]; t[o+1] = B.pos[j+1]; t[o+2] = B.pos[j+2];
   }
   g.attributes.position.needsUpdate = true;
   g.attributes.aTo.needsUpdate = true;
@@ -1245,13 +1812,21 @@ function armDust(hit){
   return true;
 }
 
-function startMorph(hit){
-  if(!ready) return;
-  if(morph){ queued = 1; return; }              // a tap mid-flight still counts
-  if(!dustReady){ queued = 1; return; }         // the grains are still being cut
-  if(!armDust(hit)) return;
+function queueMorph(key, opt){
+  if(!FORM_DEFS[key]) return;
+  mQueue.push(Object.assign({ to:key }, opt || {}));
+  if(mQueue.length > 4) mQueue.splice(0, mQueue.length - 4);
+  pumpMorph();
+}
 
-  morph = { t:0, sealed:false };
+function pumpMorph(){
+  if(morph || hold > 0 || !ready || !dustReady) return;
+  let job = mQueue.shift();
+  while(job && job.to === curForm) job = mQueue.shift();   // already wearing it
+  if(!job) return;
+  if(!armDust(curForm, job.to, job.hit)) return;
+
+  morph = { to:job.to, t:0, sealed:false, swapped:false, dwell:job.dwell || 0 };
   dustMat.uniforms.uSwirl.value *= -1;          // the twist alternates, so no two are alike
   dust.visible = true;
   formFade = 1;
@@ -1259,8 +1834,37 @@ function startMorph(hit){
   morphSound();
 }
 
+// kept under its old name: a tap on the form still means "come apart", it just
+// has somewhere to go now — out to a structure, a beat, and back to whatever
+// the visitor had chosen
+function startMorph(hit){
+  if(!ready) return;
+  mQueue.length = 0;
+  const inter = INTERLUDES[interIx++ % INTERLUDES.length];
+  queueMorph(inter === homeForm ? INTERLUDES[interIx++ % INTERLUDES.length] : inter,
+             { hit, dwell: reduce ? 0.45 : 1.0 });
+  queueMorph(homeForm, {});
+}
+
+// choosing a field is a single hop, and it becomes the new home
+function goForm(key, opt){
+  if(!FORM_DEFS[key] || !ready) return;
+  homeForm = key;
+  if(key === curForm && !morph){ setCaption(FORM_DEFS[key]); return; }
+  mQueue.length = 0;
+  queueMorph(key, opt);
+}
+
 function stepMorph(dt){
-  if(!morph) return;
+  if(!morph){
+    if(hold > 0){
+      hold -= dt;
+      if(hold <= 0){ hold = 0; pumpMorph(); }
+    }else if(mQueue.length) pumpMorph();
+    liveK = THREE.MathUtils.clamp(liveK + (1 - liveK) * Math.min(1, dt*1.6), 0, 1);
+    uLiveK.value = liveK;
+    return;
+  }
   morph.t += dt;
   const k = Math.min(1, morph.t / MORPH_T);
   const u = dustMat.uniforms;
@@ -1270,36 +1874,56 @@ function stepMorph(dt){
   // the solid lets go early and is back before the grains have finished settling
   formFade = Math.max(1 - sstep(k/0.17), sstep((k - 0.78)/0.22));
 
-  if(!morph.sealed && k > 0.83){                // a ring closes over the letter again
+  // the swap happens at the bottom of that curve, where there is no solid to see
+  if(!morph.swapped && k > 0.46){
+    morph.swapped = true;
+    wearForm(morph.to);
+  }
+
+  liveK = THREE.MathUtils.clamp(liveK - liveK * Math.min(1, dt*5.0), 0, 1);  // the old behaviour drops away first
+  uLiveK.value = liveK;
+
+  if(!morph.sealed && k > 0.83){                // a ring closes over the form again
     morph.sealed = true;
     spawnRing(new THREE.Vector3(0,0,0.34), new THREE.Vector3(0,0,1), 0);
     chime();
   }
   if(k >= 1){
+    hold = morph.dwell;
     morph = null;
     dust.visible = false;
     formFade = 1;
-    if(queued){ queued = 0; startMorph(null); }
+    if(hold <= 0) pumpMorph();
   }
 }
 
-// one place decides how solid the form looks, so the morph and the intro agree
+// one place decides how solid the form looks, so the morph, the intro and the
+// reveal all agree. formFade is the morph's business; reveal is hover's.
 function applyFade(ease){
   if(!ready) return;
   const v = formFade, T = TH();
   matte.material.opacity = v;
-  matte.material.depthWrite = v > 0.5;         // or the solid would mask its own dust
+  // a shell you can see through cannot also be writing depth, or it masks both
+  // its own grains and the armature the hover is there to show
+  matte.material.depthWrite = v > 0.5 && reveal < 0.4;
   wire.material.opacity = v;
-  outline.material.opacity = T.lineOp * ease * v;
+  outline.material.opacity = T.lineOp * ease * v * (1 + 1.5*reveal);
   wire.visible = v > 0.02;
   outline.visible = v > 0.02;
   glass.visible = v > 0.9;                     // transmission doesn't fade cleanly
   glass.material.opacity = v;
-  const s = 0.986 + 0.014*v;                   // the solid contracts a hair as it lets go
-  matte.scale.setScalar(s);
-  outline.scale.setScalar(1.002*s);
-  wire.scale.setScalar(1.006*s);
-  glass.scale.setScalar(1.004*s);
+
+  const inner = reveal * ease * v;
+  core.visible = inner > 0.012;
+  core.material.opacity = inner * 0.52;
+  nucleus.visible = inner > 0.012;
+  nucleus.material.opacity = inner * 0.9;
+
+  const sc = 0.986 + 0.014*v;                  // the solid contracts a hair as it lets go
+  matte.scale.setScalar(sc);
+  outline.scale.setScalar(1.002*sc);
+  wire.scale.setScalar(1.006*sc);
+  glass.scale.setScalar(1.004*sc);
 }
 
 /* ══ audio ════════════════════════════════════════════════════════════════ */
@@ -1761,7 +2385,8 @@ function buildChips(){
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'chip'; b.dataset.tag = f.key;
     b.innerHTML = '<i>'+String(i+1).padStart(2,'0')+'</i><span>'+f.key+'</span>';
-    b.addEventListener('pointerenter', ()=>{ setActive(i); blip(1240, 0.03); });
+    b.addEventListener('pointerenter', ()=>{ setActive(i); blip(1240, 0.03); previewField(i); });
+    b.addEventListener('pointerleave', releasePreview);
     b.addEventListener('click', ()=>openField(i));
     exploreEl.appendChild(b);
     return b;
@@ -1769,6 +2394,30 @@ function buildChips(){
   chipAngle = FIELDS.map((f,i)=> -Math.PI/2 + i*(Math.PI*2/FIELDS.length));
   active = 0;
   if(chips[0]) chips[0].classList.add('hot');
+}
+
+/* ── reaching for a field ─────────────────────────────────────────────────
+   Hovering a label is not a decision, so it is treated as one: the form takes
+   that field's shape after a short beat, and drifts back to the seed if the
+   hand moves away without choosing. Clicking commits — the shape stays while
+   the archive is open, and the seed is what closing it returns you to.
+
+   The delay is what makes this readable rather than twitchy. A pointer crossing
+   the ring on its way somewhere else never triggers a hop. */
+let previewTimer = null, releaseTimer = null;
+
+function previewField(i){
+  const f = FIELDS[i];
+  if(!f) return;
+  const key = formForField(f.key);
+  if(!key) return;
+  clearTimeout(previewTimer); clearTimeout(releaseTimer);
+  previewTimer = setTimeout(()=>goForm(key), 240);
+}
+
+function releasePreview(){
+  clearTimeout(previewTimer); clearTimeout(releaseTimer);
+  releaseTimer = setTimeout(()=>{ if(!panelOpen) goForm('SEED'); }, 1100);
 }
 
 let chipRX = 1, chipRY = 1;
@@ -1825,7 +2474,7 @@ function refreshExplore(){
   }, 420);
 }
 exploreEl.addEventListener('pointerenter', ()=>{ hoverChips = true; refreshExplore(); });
-exploreEl.addEventListener('pointerleave', ()=>{ hoverChips = false; refreshExplore(); });
+exploreEl.addEventListener('pointerleave', ()=>{ hoverChips = false; releasePreview(); refreshExplore(); });
 
 /* ══ work panel ═══════════════════════════════════════════════════════════ */
 const panel = document.getElementById('panel');
@@ -1867,6 +2516,9 @@ function openPage(k){
 function openField(i){
   fieldIx = i; workIx = -1;
   const f = FIELDS[i];
+  clearTimeout(previewTimer); clearTimeout(releaseTimer);
+  const shape = f && formForField(f.key);
+  if(shape) goForm(shape);
   haltMedia(gridEl);
   gridEl.className = 'grid';
   pField.textContent = f.key;
@@ -2009,6 +2661,8 @@ function stepWork(d){
 
 function closePanel(){
   panelOpen = false;
+  clearTimeout(previewTimer); clearTimeout(releaseTimer);
+  goForm('SEED');
   panel.classList.remove('on');
   panel.setAttribute('aria-hidden','true');
   haltMedia(panel);
@@ -2244,7 +2898,7 @@ const TAP_SLOP = coarse ? 14 : 6;        // px of travel still read as a tap
 const TAP_MS = 700;
 const SPIN_PER_PX = 0.0070;
 const TILT_PER_PX = 0.0042;
-let tilt = 0, tiltV = 0, grab = null;
+let tilt = 0, tiltV = 0, grab = null, touchHold = false;
 
 // belt-and-braces: some mobile WebKit builds are inconsistent about treating
 // a bare 'pointerdown' as the kind of user gesture that's allowed to unlock
@@ -2269,7 +2923,7 @@ addEventListener('pointerdown', e=>{
   grab = { id:e.pointerId, x:e.clientX, y:e.clientY, lx:e.clientX, ly:e.clientY,
            travel:0, t:performance.now(), turning:false, fx:0, fy:0 };
   try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
-  if(pick(e.clientX, e.clientY)){ hoverForm = true; refreshExplore(); }
+  if(pick(e.clientX, e.clientY)){ hoverForm = true; touchHold = true; refreshExplore(); }
 });
 
 addEventListener('pointermove', e=>{
@@ -2290,6 +2944,7 @@ addEventListener('pointermove', e=>{
 function letGo(e){
   if(!grab || (e && e.pointerId !== grab.id)) return;
   const g = grab; grab = null;
+  touchHold = false;
   try{ canvas.releasePointerCapture(g.id); }catch(err){}
 
   // a mouse leaving the glass takes the lens with it; a finger has no such
@@ -2451,6 +3106,7 @@ function resize(){
   sizeDust();
   drawPoster(VW, VH, DPR);
   placeChips();
+  placeCaption();
   refreshExplore();
 }
 addEventListener('resize', resize);
@@ -2463,11 +3119,11 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(resize).cat
 setTimeout(resize, 400);
 
 /* ══ frame ════════════════════════════════════════════════════════════════ */
-let first = true, last = performance.now(), fpsAcc = 0, fpsN = 0, bootP = 0;
+let first = true, last = performance.now(), fpsAcc = 0, fpsN = 0, bootP = 0, liveT = 0;
 
 function frame(now){
   requestAnimationFrame(frame);
-  const dt = Math.min(0.05, (now - last)/1000 || 0.016);
+  const dt = Math.min(0.05, Math.max(0, (now - last)/1000 || 0.016));
   last = now;
   clock += 0.0068;
 
@@ -2529,6 +3185,22 @@ function frame(now){
     group.position.x = groupX;
     group.position.y = centreY + Math.sin(clock*1.15)*0.1;
     group.scale.setScalar((0.9 + 0.1*ease) * (panelOpen && VW > 900 ? 0.86 : 1));
+
+    // the behaviours run on real seconds, not on frames, so a slow device shows
+    // the same tempo as a fast one
+    liveT += dt;
+    uT.value = liveT;
+
+    // hover opens the shell. A phone has no hover to offer, so a finger held on
+    // the form does the same job — press to look inside, lift to close it.
+    const wantOpen = !morph && !panelOpen && (coarse ? touchHold : hoverForm);
+    reveal += ((wantOpen ? 1 : 0) - reveal) * (wantOpen ? 0.13 : 0.09);
+    if(reveal < 0.002) reveal = 0;
+    uReveal.value = reveal;
+    if(core.visible) core.rotation.y = clock*0.4;
+    if(nucleus.visible){ nucleus.rotation.y = -clock*0.7; nucleus.rotation.x = clock*0.3; }
+
+    if(capEl) capEl.classList.toggle('hidden', panelOpen || !ready);
 
     stepMorph(dt);
     applyFade(ease);
