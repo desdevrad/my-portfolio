@@ -124,6 +124,14 @@ Replace `about/cv.pdf`. The About page links it with its size and the date it
 last changed, and the link carries a content hash so visitors get the new file
 immediately instead of a cached copy.
 
+### The 3D model on the homepage
+
+Replace `model/logo.glb` with another binary glTF file — same name, same
+folder — to try a different shape. The page strips it down to plain geometry
+and applies its own materials and animation, so you don't need to match any
+particular scale, pivot or look; see `model/README.md` for details and what
+makes a good candidate.
+
 ### Your bio and contact details
 
 - `about/about.md` — headline and biography paragraphs.
