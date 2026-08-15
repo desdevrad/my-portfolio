@@ -420,6 +420,14 @@
   .rights{font-family:'Azeret Mono',ui-monospace,monospace;font-size:7.5px;
     letter-spacing:.2em;color:var(--dim);line-height:1.6;white-space:nowrap}
 
+  /* on desktop, pull the rights line out of the right-hand stack and
+     center it on the page, independent of the footer's own padding */
+  @media (min-width:901px){
+    .rights{position:fixed;left:50%;bottom:clamp(20px,3vw,36px);
+      transform:translateX(-50%);z-index:4}
+  }
+
+
   @media (max-width:900px){
     .panel{width:100%;border-left:0}
     .grid{grid-template-columns:1fr}
