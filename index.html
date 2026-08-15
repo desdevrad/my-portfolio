@@ -2231,9 +2231,14 @@ const TILT_PER_PX = 0.0042;
 let tilt = 0, tiltV = 0, grab = null;
 
 addEventListener('pointerdown', e=>{
+  // unlock audio on the very first touch contact anywhere on the page —
+  // this must run before the UI exclusion below, which only exists to stop
+  // taps on buttons/chips/panels from also spinning the 3D model. Without
+  // this, tapping a floating chip (they carry [data-tag] too) never unlocked
+  // audio, since it isn't part of the .hud button group either.
+  startAudio();
   if(e.target.closest && (e.target.closest('[data-tag]') || e.target.closest('.panel,.lens'))) return;
   exploreIntro = false;
-  startAudio();
   grab = { id:e.pointerId, x:e.clientX, y:e.clientY, lx:e.clientX, ly:e.clientY,
            travel:0, t:performance.now(), turning:false, fx:0, fy:0 };
   try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
