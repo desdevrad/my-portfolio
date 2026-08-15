@@ -1,29 +1,32 @@
 ---
-title: Rushin
+title: RUSHIN
 client: Rushin
 year: 2024
-role: Motion Designer
-category: Motion
-order: 1
+role: Creative Director & Designer
+category: Branding
+order: 3
 cover: cover.jpg
-link: https://www.instagram.com/p/DXoPIy8iJ07/
-tag: XR / AUGMENTED REALITY / 2025
+tag: LOGO & VISUAL IDENTITY / 2024
 label_overview: OVERVIEW
 label_contribution: CONTRIBUTION
-clients:
-- Children's Capital of Culture
-- Rotherham Music
-roles:
-- 3D Artist
-- Real-time Asset Creation
-- AR Content Production
+client:
+
+* Rushin
+  roles:
+* Creative Direction
+* Logo Design
+* Visual Identity Design
+
 ---
 
 ## Overview
-AppeaR is a location-based augmented reality experience that brings the creativity of children and young people across Rotherham, UK, into public space. Drawings, crafts, stories, and music created during a two-year workshop program were transformed into interactive AR experiences, allowing visitors to explore the city through a new generation's perspective.
+
+Rushin is an educational and research-focused event platform designed to support academic and intellectual development through workshops, courses, field visits, camps, and hands-on learning experiences.
+
+The visual identity explores the connection between the human mind, nature, and generative systems. The central concept draws from the visual language of the brain and tree structures, using the branching logic of a fractal canopy as a metaphor for learning, growth, and the continuous expansion of knowledge.
 
 ## Contribution
-As a 3D Artist, I was responsible for creating and optimizing real-time assets for the AR experience. The work focused on translating children's artwork into engaging three-dimensional content while maintaining visual clarity and performance for mobile AR.
 
-## Credit
-Project developed under the art direction of [Mostafa Seyyed Ebrahimi](https://www.instagram.com/seyyedebrahimi/) at [DEEEZ](https://deeez.co/) design studio.
+As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Rushin. The design system was built around the idea of a “fractal canopy”, combining organic branching structures with the visual complexity of the brain and generative patterns.
+
+The identity translates these ideas into a flexible visual language that represents knowledge as a growing, interconnected system, where each new idea creates the potential for further exploration and discovery.
