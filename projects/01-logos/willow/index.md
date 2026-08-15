@@ -9,7 +9,7 @@ cover: cover.jpg
 tag: LOGO & VISUAL IDENTITY / 2023
 label_overview: OVERVIEW
 label_contribution: CONTRIBUTION
-clients:
+client:
 - Willow Beauty Products
 roles:
 - Creative Direction
