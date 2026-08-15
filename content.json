@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-15T10:15:38.582Z",
+  "generated": "2026-08-15T10:20:38.145Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -86,9 +86,7 @@
         {
           "slug": "latentspace",
           "t": "LATENT SPACE",
-          "c": [
-            "Latent Space"
-          ],
+          "c": "Latent Space",
           "y": "2024",
           "r": "Creative Director & Designer",
           "order": 1,
@@ -111,6 +109,9 @@
           "b": "Latent Space is a technology-driven company specializing in advanced AI solutions, data visualization, and predictive analytics. The project focused on developing a visual identity that reflects the brand's approach to uncovering hidden insights, navigating complex datasets, and enabling new possibilities through technology.",
           "a": "As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Latent Space. The identity explores the relationship between exploration, location, and data, combining a cursive “L” with a location marker to create a distinctive and memorable visual symbol.\nThe design direction focused on balancing technological innovation with simplicity, precision, and elegance.",
           "credit": null,
+          "clients": [
+            "Latent Space"
+          ],
           "roles": [
             "Creative Direction",
             "Logo Design",
