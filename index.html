@@ -758,13 +758,18 @@ function drawPoster(w, h, dpr){
   pctx.fillStyle = glow; pctx.fillRect(0,0,w,h);
 
   const step = Math.max(52, Math.round(Math.min(w,h)/14));
+  const cx = w/2, cy = h/2;
   pctx.lineWidth = 1;
-  for(let i=0, x=w/2%step; x<w; x+=step, i++){
-    pctx.strokeStyle = i%5===0 ? P.g1 : P.g2;
+  for(let n=Math.ceil(-cx/step); cx+n*step<=w; n++){
+    const x = cx+n*step;
+    if(x<0) continue;
+    pctx.strokeStyle = n%5===0 ? P.g1 : P.g2;
     pctx.beginPath(); pctx.moveTo(Math.round(x)+.5,0); pctx.lineTo(Math.round(x)+.5,h); pctx.stroke();
   }
-  for(let i=0, y=h/2%step; y<h; y+=step, i++){
-    pctx.strokeStyle = i%5===0 ? P.g1 : P.g2;
+  for(let n=Math.ceil(-cy/step); cy+n*step<=h; n++){
+    const y = cy+n*step;
+    if(y<0) continue;
+    pctx.strokeStyle = n%5===0 ? P.g1 : P.g2;
     pctx.beginPath(); pctx.moveTo(0,Math.round(y)+.5); pctx.lineTo(w,Math.round(y)+.5); pctx.stroke();
   }
 
