@@ -9,7 +9,7 @@ cover: cover.jpg
 tag: LOGO & VISUAL IDENTITY / 2024
 label_overview: OVERVIEW
 label_contribution: CONTRIBUTION
-clients:
+client:
 - Latent Space
 roles:
 - Creative Direction
