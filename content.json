@@ -121,9 +121,7 @@
         {
           "slug": "willow",
           "t": "WILLOW",
-          "c": [
-            "Willow Beauty Products"
-          ],
+          "c": "Willow Beauty Products",
           "y": "2023",
           "r": "Creative Director & Designer",
           "order": 2,
@@ -198,9 +196,7 @@
         {
           "slug": "rushin",
           "t": "RUSHIN",
-          "c": [
-            "Rushin"
-          ],
+          "c": "Rushin",
           "y": "2024",
           "r": "Creative Director & Designer",
           "order": 3,
