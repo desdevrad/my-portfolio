@@ -1,0 +1,219 @@
+{
+  "generated": "2026-08-15T10:44:10.740Z",
+  "site": {
+    "name": "Kiarash Farahmandrad",
+    "role": "Multi-disciplinary designer",
+    "email": {
+      "user": "k.farahmandrad",
+      "domain": "gmail",
+      "tld": "com"
+    },
+    "links": {
+      "LINKEDIN": "https://www.linkedin.com/in/kia-rad/"
+    },
+    "details": {
+      "BASED IN": "Tehran, Iran",
+      "AVAILABILITY": "Open to commissions",
+      "RESPONSE": "Within a few days"
+    }
+  },
+  "about": {
+    "portrait": "about/me.jpg",
+    "caption": "KIARASH FARAHMANDRAD",
+    "headline": "Marks, images and spaces that hold their shape under pressure.",
+    "paragraphs": [
+      "I work across identity, print, 3D and real-time — in the space where those disciplines stop behaving like separate trades. A logotype has to survive being embroidered and rendered at 12px. A programme has to fold down into a poster. An AR layer has to load before anyone loses interest. The medium keeps changing; the problem of staying legible under pressure does not.",
+      "Based in Tehran, working with technology platforms at home and cultural projects abroad. Most things start on paper or on a grid before anything gets rendered, and most arrive as a question about form and leave as a system somebody else can run without me."
+    ],
+    "practice": null,
+    "cv": {
+      "src": "about/cv.pdf",
+      "hash": "988fc4c2",
+      "updated": "2026-08-14",
+      "size": "464 KB"
+    }
+  },
+  "clients": {
+    "lede": "The list runs from technology platforms to cultural institutions. Some arrived for a single mark; others for a system a whole team would go on to run.",
+    "logos": [
+      {
+        "name": "Divar",
+        "src": "clients/Divar.png"
+      },
+      {
+        "name": "Nodet",
+        "src": "clients/Nodet.png"
+      },
+      {
+        "name": "Snapp Group",
+        "src": "clients/Snapp Group.png"
+      },
+      {
+        "name": "Tehran University",
+        "src": "clients/Tehran University.png"
+      }
+    ],
+    "engagements": [
+      {
+        "name": "CHILDREN'S CAPITAL OF CULTURE",
+        "scope": "3D ARTIST",
+        "year": "2025"
+      },
+      {
+        "name": "LATENT SPACE",
+        "scope": "CREATIVE DIRECTION",
+        "year": "2024"
+      },
+      {
+        "name": "RUSHIN",
+        "scope": "CREATIVE DIRECTION",
+        "year": "2024"
+      },
+      {
+        "name": "WILLOW BEAUTY PRODUCTS",
+        "scope": "CREATIVE DIRECTION",
+        "year": "2023"
+      }
+    ]
+  },
+  "fields": [
+    {
+      "key": "LOGOS",
+      "sub": "MARKS & IDENTITY",
+      "kind": 0,
+      "order": 0,
+      "works": [
+        {
+          "slug": "latentspace",
+          "t": "LATENT SPACE",
+          "c": "Latent Space",
+          "y": "2024",
+          "r": "Creative Director & Designer",
+          "order": 1,
+          "img": "projects/01-logos/latentspace/cover.jpg",
+          "video": null,
+          "gallery": [
+            "projects/01-logos/latentspace/01.jpg",
+            "projects/01-logos/latentspace/02.jpg",
+            "projects/01-logos/latentspace/03.jpg",
+            "projects/01-logos/latentspace/05.jpg",
+            "projects/01-logos/latentspace/06.jpg",
+            "projects/01-logos/latentspace/07.jpg",
+            "projects/01-logos/latentspace/08.jpg",
+            "projects/01-logos/latentspace/09.jpg"
+          ],
+          "link": null,
+          "tag": "LOGO & VISUAL IDENTITY / 2024",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "Latent Space is a technology-driven company specializing in advanced AI solutions, data visualization, and predictive analytics. The project focused on developing a visual identity that reflects the brand's approach to uncovering hidden insights, navigating complex datasets, and enabling new possibilities through technology.",
+          "a": "As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Latent Space. The identity explores the relationship between exploration, location, and data, combining a cursive “L” with a location marker to create a distinctive and memorable visual symbol.\nThe design direction focused on balancing technological innovation with simplicity, precision, and elegance.",
+          "credit": null,
+          "roles": [
+            "Creative Direction",
+            "Logo Design",
+            "Visual Identity Design"
+          ]
+        },
+        {
+          "slug": "willow",
+          "t": "WILLOW",
+          "c": "Willow Beauty Products",
+          "y": "2023",
+          "r": "Creative Director & Designer",
+          "order": 2,
+          "img": "projects/01-logos/willow/cover.jpg",
+          "video": null,
+          "gallery": [
+            "projects/01-logos/willow/01.jpg",
+            "projects/01-logos/willow/02.jpg",
+            "projects/01-logos/willow/03.jpg",
+            "projects/01-logos/willow/04.jpg",
+            "projects/01-logos/willow/05.jpg",
+            "projects/01-logos/willow/06.jpg",
+            "projects/01-logos/willow/07.jpg",
+            "projects/01-logos/willow/08.jpg"
+          ],
+          "link": null,
+          "tag": "LOGO & VISUAL IDENTITY / 2023",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "Willow is a beauty brand dedicated to natural, plant-based skincare. The brand's ethos centers on the idea that true beauty comes from nature, with products crafted using sustainable botanical ingredients to nourish and enhance the skin.\nThe visual identity was developed to reflect Willow's natural, eco-conscious values while creating a sense of elegance, serenity, and refined beauty.",
+          "a": "As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Willow. The core concept combines the essence of a flower with the brand's initial “W”, creating a distinctive symbol that connects the identity to its botanical foundation.\nThe design direction focused on creating a balance between organic forms and modern simplicity, resulting in an identity that feels natural, sophisticated, and suitable for a luxury skincare brand.",
+          "credit": null,
+          "roles": [
+            "Creative Direction",
+            "Logo Design",
+            "Visual Identity Design"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "XR",
+      "sub": "SPATIAL & REALTIME",
+      "kind": 3,
+      "order": 3,
+      "works": [
+        {
+          "slug": "appear",
+          "t": "APPEAR",
+          "c": "",
+          "y": "2025",
+          "r": "3D Artist",
+          "order": 1,
+          "img": "projects/04-xr/appear/cover.jpg",
+          "video": null,
+          "gallery": [],
+          "link": "https://www.instagram.com/p/DXoPIy8iJ07/",
+          "tag": "XR / AUGMENTED REALITY / 2025",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "AppeaR is a location-based augmented reality experience that brings the creativity of children and young people across Rotherham, UK, into public space. Drawings, crafts, stories, and music created during a two-year workshop program were transformed into interactive AR experiences, allowing visitors to explore the city through a new generation's perspective.",
+          "a": "As a 3D Artist, I was responsible for creating and optimizing real-time assets for the AR experience. The work focused on translating children's artwork into engaging three-dimensional content while maintaining visual clarity and performance for mobile AR.",
+          "credit": "Project developed under the art direction of <a href=\"https://www.instagram.com/seyyedebrahimi/\" target=\"_blank\" rel=\"noopener\" data-tag=\"MOSTAFA SEYYED EBRAHIMI\">Mostafa Seyyed Ebrahimi</a> at <a href=\"https://deeez.co/\" target=\"_blank\" rel=\"noopener\" data-tag=\"DEEEZ\">DEEEZ</a> design studio.",
+          "clients": [
+            "Children's Capital of Culture",
+            "Rotherham Music"
+          ],
+          "roles": [
+            "3D Artist",
+            "Real-time Asset Creation",
+            "AR Content Production"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "MOTION",
+      "sub": "TIME & SEQUENCE",
+      "kind": 4,
+      "order": 4,
+      "works": [
+        {
+          "slug": "rushin",
+          "t": "RUSHIN",
+          "c": "Rushin",
+          "y": "2024",
+          "r": "Creative Director & Designer",
+          "order": 3,
+          "img": null,
+          "video": "projects/05-motion/rushin/motion.mp4",
+          "gallery": [],
+          "link": null,
+          "tag": "LOGO & VISUAL IDENTITY / 2024",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "Rushin is an educational and research-focused event platform designed to support academic and intellectual development through workshops, courses, field visits, camps, and hands-on learning experiences.\nThe visual identity explores the connection between the human mind, nature, and generative systems. The central concept draws from the visual language of the brain and tree structures, using the branching logic of a fractal canopy as a metaphor for learning, growth, and the continuous expansion of knowledge.",
+          "a": "As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Rushin. The design system was built around the idea of a “fractal canopy”, combining organic branching structures with the visual complexity of the brain and generative patterns.\nThe identity translates these ideas into a flexible visual language that represents knowledge as a growing, interconnected system, where each new idea creates the potential for further exploration and discovery.",
+          "credit": null,
+          "roles": [
+            "Creative Direction",
+            "Logo Design",
+            "Visual Identity Design"
+          ]
+        }
+      ]
+    }
+  ]
+}
