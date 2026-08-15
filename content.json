@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-15T10:44:10.740Z",
+  "generated": "2026-08-15T11:44:42.606Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -89,7 +89,6 @@
           "c": "Latent Space",
           "y": "2024",
           "r": "Creative Director & Designer",
-          "order": 1,
           "img": "projects/01-logos/latentspace/cover.jpg",
           "video": null,
           "gallery": [
@@ -121,7 +120,6 @@
           "c": "Willow Beauty Products",
           "y": "2023",
           "r": "Creative Director & Designer",
-          "order": 2,
           "img": "projects/01-logos/willow/cover.jpg",
           "video": null,
           "gallery": [
@@ -161,7 +159,6 @@
           "c": "",
           "y": "2025",
           "r": "3D Artist",
-          "order": 1,
           "img": "projects/04-xr/appear/cover.jpg",
           "video": null,
           "gallery": [],
@@ -196,7 +193,6 @@
           "c": "Rushin",
           "y": "2024",
           "r": "Creative Director & Designer",
-          "order": 3,
           "img": null,
           "video": "projects/05-motion/rushin/motion.mp4",
           "gallery": [],

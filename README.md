@@ -41,7 +41,6 @@ title: Night Index
 client: Some Organisation
 year: 2026
 role: Editorial
-order: 1
 cover: cover.jpg
 link: https://example.com/the-project
 tag: PRINT / EDITORIAL / 2026
@@ -68,8 +67,10 @@ Anyone else who should be named.
 
 Notes:
 
-- **`order`** sorts projects inside a category (lowest first). Without it,
-  folders sort by name.
+- **Projects sort themselves.** Inside a category, newest `year` comes first;
+  a project with no year sinks to the bottom. Same year (or both undated)
+  breaks the tie alphabetically by `title`. Nothing to renumber — add a
+  project and it slots in on its own.
 - **`cover`** is optional. If you leave it out, the generator looks for a file
   called `cover.*`, then falls back to the first image in the folder.
 - **Gallery** is every remaining image in the folder, sorted naturally, so
