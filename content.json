@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-15T09:41:59.721Z",
+  "generated": "2026-08-15T09:50:41.286Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -65,8 +65,8 @@
         "year": "2024"
       },
       {
-        "name": "",
-        "scope": "CREATIVE DIRECTOR & DESIGNER",
+        "name": "RUSHIN",
+        "scope": "CREATIVE DIRECTION",
         "year": "2024"
       },
       {
@@ -196,7 +196,9 @@
         {
           "slug": "rushin",
           "t": "RUSHIN",
-          "c": [],
+          "c": [
+            "Rushin"
+          ],
           "y": "2024",
           "r": "Creative Director & Designer",
           "order": 3,
@@ -209,7 +211,12 @@
           "la": "CONTRIBUTION",
           "b": "Rushin is an educational and research-focused event platform designed to support academic and intellectual development through workshops, courses, field visits, camps, and hands-on learning experiences.\nThe visual identity explores the connection between the human mind, nature, and generative systems. The central concept draws from the visual language of the brain and tree structures, using the branching logic of a fractal canopy as a metaphor for learning, growth, and the continuous expansion of knowledge.",
           "a": "As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Rushin. The design system was built around the idea of a “fractal canopy”, combining organic branching structures with the visual complexity of the brain and generative patterns.\nThe identity translates these ideas into a flexible visual language that represents knowledge as a growing, interconnected system, where each new idea creates the potential for further exploration and discovery.",
-          "credit": null
+          "credit": null,
+          "roles": [
+            "Creative Direction",
+            "Logo Design",
+            "Visual Identity Design"
+          ]
         }
       ]
     }
