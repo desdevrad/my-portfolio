@@ -10,13 +10,11 @@ tag: LOGO & VISUAL IDENTITY / 2024
 label_overview: OVERVIEW
 label_contribution: CONTRIBUTION
 client:
-
-* Rushin
-  roles:
-* Creative Direction
-* Logo Design
-* Visual Identity Design
-
+- Rushin
+roles:
+- Creative Direction
+- Logo Design
+- Visual Identity Design
 ---
 
 ## Overview
