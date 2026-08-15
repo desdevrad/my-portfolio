@@ -1919,8 +1919,7 @@ function workInfo(w){
       (w.credit ? '<p>'+w.credit+'</p>' : '') +
     '</div>';
   }
-  if(w.clients) h += '<div><b>CLIENT'+(w.clients.length > 1 ? 'S' : '')+
-    '</b><div class="tags">'+chips_(w.clients)+'</div></div>';
+  if(w.clients) h += '<div><b>CLIENT</b><div class="tags">'+chips_(w.clients)+'</div></div>';
   if(w.roles)   h += '<div><b>ROLE</b><div class="tags">'+chips_(w.roles)+'</div></div>';
 
   const row =
