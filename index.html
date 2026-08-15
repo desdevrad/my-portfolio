@@ -574,7 +574,7 @@
     </div>
     <nav class="menu">
       <button type="button" data-page="ABOUT" data-tag="ABOUT"><i>01</i>ABOUT</button>
-      <button type="button" data-page="CLIENT" data-tag="CLIENT"><i>02</i>CLIENTS</button>
+      <button type="button" data-page="CLIENTS" data-tag="CLIENTS"><i>02</i>CLIENTS</button>
       <button type="button" data-page="CONTACT" data-tag="CONTACT"><i>03</i>CONTACT</button>
     </nav>
   </header>
@@ -618,7 +618,6 @@
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 
@@ -626,9 +625,6 @@ import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 const MODEL_URL = 'model/logo.glb';   // swap this file to try a different model — see model/README.md
 const FIT = 3.0;                      // on-screen height of the form, world units
 const BACK_Z = -6;
-
-// fallback outline, extruded — only used if the model can't be read
-const D = "M0,90.08c3.8-5.09,6.69-9.62,10.31-9.62,3.17,0,8.22,2.75,18.33,3.38,16.01,0,29.78-18.94,31.68-22.4l-1.12-1.12c-.25.13-5.81,3.2-16.16,3.2-14.63,0-24.48-4.69-24.48-20.48C18.56,23.89,29.64,0,43.36,0c15.87,0,27.36,21.13,27.36,49.28,0,26.34-14.15,51.04-35.52,51.04-9.3,0-13.8-1.98-35.2-10.24ZM42.4,18.08c-8.26,0-12.58,11.99-12.32,20.32,2.8,1.82,5.58,2.72,12.8,2.72h15.04c-1.26-11.65-7.99-23.04-15.52-23.04Z";
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarse = matchMedia('(pointer: coarse)').matches;
@@ -944,17 +940,6 @@ function flatten(root){
   return parts.length === 1 ? parts[0] : BufferGeometryUtils.mergeGeometries(parts, false);
 }
 
-function svgFallback(){
-  const shapes = SVGLoader.createShapes(new SVGLoader().parse(
-    '<svg viewBox="0 0 70.72 100.32"><path d="'+D+'"/></svg>').paths[0]);
-  const g = new THREE.ExtrudeGeometry(shapes, {
-    depth:17, curveSegments:26, bevelEnabled:true, bevelThickness:1.7, bevelSize:1.3, bevelSegments:6
-  });
-  g.rotateX(Math.PI);
-  g.computeVertexNormals();
-  return g;
-}
-
 let matte, glass, outline, wire, ready = false;
 
 function build(geo){
@@ -1013,12 +998,11 @@ new GLTFLoader().load(
   gltf=>{
     const geo = flatten(gltf.scene);
     if(geo) build(geo);
-    else { bootmsg.textContent = 'FALLBACK GEOMETRY'; build(svgFallback()); }
+    else bootmsg.textContent = 'MODEL NOT FOUND';
   },
   undefined,
   ()=>{
-    bootmsg.textContent = 'FALLBACK GEOMETRY';
-    build(svgFallback());
+    bootmsg.textContent = 'MODEL NOT FOUND';
   }
 );
 
@@ -2664,7 +2648,7 @@ function buildPages(c){
 
   const engagements = clients.engagements || [];
 
-  pages.CLIENT = {
+  pages.CLIENTS = {
     sub: String(logos.length).padStart(2,'0') + ' ORGANISATIONS',
     html: ()=>
       (clients.lede ? '<p class="lede">'+esc(clients.lede)+'</p>' : '') +
