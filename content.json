@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-15T19:00:26.917Z",
+  "generated": "2026-08-15T21:36:29.366Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -49,6 +49,10 @@
         "src": "clients/Snapp Group.png"
       },
       {
+        "name": "Tardid   Virtual Philosophy School",
+        "src": "clients/Tardid - Virtual Philosophy School.png"
+      },
+      {
         "name": "Tehran University",
         "src": "clients/Tehran University.png"
       }
@@ -66,6 +70,11 @@
       },
       {
         "name": "LATENT SPACE",
+        "scope": "CREATIVE DIRECTION",
+        "year": "2024"
+      },
+      {
+        "name": "MOKHTARZADE CONSTRUCTION COMPANY",
         "scope": "CREATIVE DIRECTION",
         "year": "2024"
       },
@@ -144,6 +153,52 @@
           "la": "CONTRIBUTION",
           "b": "Latent Space is a technology-driven company specializing in advanced AI solutions, data visualization, and predictive analytics. The project focused on developing a visual identity that reflects the brand's approach to uncovering hidden insights, navigating complex datasets, and enabling new possibilities through technology.",
           "a": "As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Latent Space. The identity explores the relationship between exploration, location, and data, combining a cursive “L” with a location marker to create a distinctive and memorable visual symbol.\nThe design direction focused on balancing technological innovation with simplicity, precision, and elegance.",
+          "credit": null,
+          "roles": [
+            "Creative Direction",
+            "Logo Design",
+            "Visual Identity Design"
+          ]
+        },
+        {
+          "slug": "mokhtarzade",
+          "t": "MOKHTARZADE",
+          "c": "Mokhtarzade Construction Company",
+          "y": "2024",
+          "r": "Creative Director & Designer",
+          "img": "projects/01-logos/mokhtarzade/cover.jpg",
+          "video": null,
+          "gallery": [
+            "projects/01-logos/mokhtarzade/01.jpg",
+            "projects/01-logos/mokhtarzade/02.jpg",
+            "projects/01-logos/mokhtarzade/03.jpg",
+            "projects/01-logos/mokhtarzade/04.jpg",
+            "projects/01-logos/mokhtarzade/05.jpg",
+            "projects/01-logos/mokhtarzade/06.jpg",
+            "projects/01-logos/mokhtarzade/07.jpg",
+            "projects/01-logos/mokhtarzade/08.jpg",
+            "projects/01-logos/mokhtarzade/09.jpg",
+            "projects/01-logos/mokhtarzade/10.jpg",
+            "projects/01-logos/mokhtarzade/11.jpg",
+            "projects/01-logos/mokhtarzade/12.jpg",
+            "projects/01-logos/mokhtarzade/13.jpg",
+            "projects/01-logos/mokhtarzade/14.jpg",
+            "projects/01-logos/mokhtarzade/15.jpg",
+            "projects/01-logos/mokhtarzade/16.jpg",
+            "projects/01-logos/mokhtarzade/17.jpg",
+            "projects/01-logos/mokhtarzade/18.jpg",
+            "projects/01-logos/mokhtarzade/19.jpg",
+            "projects/01-logos/mokhtarzade/20.jpg",
+            "projects/01-logos/mokhtarzade/21.jpg",
+            "projects/01-logos/mokhtarzade/22.jpg",
+            "projects/01-logos/mokhtarzade/23.jpg"
+          ],
+          "link": null,
+          "tag": "BRANDING / 2024",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "Mokhtarzade is a construction company branding project, developed as a flexible identity system for use across both digital and architectural applications. The identity was designed for social media as well as physical applications throughout buildings, including metal doors, glass surfaces, stone, and other architectural elements.",
+          "a": "As the Creative Director and Designer, I developed a dynamic identity centered around a simplified “m” that can stretch vertically or horizontally depending on its context and application.\nThe visual language draws inspiration from the urban landscape, incorporating simplified forms of towers, villas, and even the negative spaces created by cement between bricks. These architectural references are translated into a flexible graphic system that allows the identity to adapt naturally across different scales, materials, and surfaces.",
           "credit": null,
           "roles": [
             "Creative Direction",
