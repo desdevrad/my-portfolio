@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-16T12:01:24.114Z",
+  "generated": "2026-08-16T22:45:48.522Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -87,6 +87,11 @@
         "name": "RUSHIN",
         "scope": "CREATIVE DIRECTION",
         "year": "2024"
+      },
+      {
+        "name": "TROID",
+        "scope": "CREATIVE DIRECTION",
+        "year": "2023"
       },
       {
         "name": "WILLOW BEAUTY PRODUCTS",
@@ -234,6 +239,38 @@
           "la": "CONTRIBUTION",
           "b": "Rushin is an educational and research-focused event platform designed to support academic and intellectual development through workshops, courses, field visits, camps, and hands-on learning experiences.\nThe visual identity explores the connection between the human mind, nature, and generative systems. The central concept draws from the visual language of the brain and tree structures, using the branching logic of a fractal canopy as a metaphor for learning, growth, and the continuous expansion of knowledge.",
           "a": "As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Rushin. The design system was built around the idea of a “fractal canopy”, combining organic branching structures with the visual complexity of the brain and generative patterns.\nThe identity translates these ideas into a flexible visual language that represents knowledge as a growing, interconnected system, where each new idea creates the potential for further exploration and discovery.",
+          "credit": null,
+          "roles": [
+            "Creative Direction",
+            "Logo Design",
+            "Visual Identity Design"
+          ]
+        },
+        {
+          "slug": "troid",
+          "t": "TROID",
+          "c": "Troid",
+          "y": "2023",
+          "r": "Creative Director & Designer",
+          "img": "projects/01-logos/troid/Cover.jpg",
+          "video": null,
+          "gallery": [
+            "projects/01-logos/troid/01.jpg",
+            "projects/01-logos/troid/02.jpg",
+            "projects/01-logos/troid/03.jpg",
+            "projects/01-logos/troid/04.jpg",
+            "projects/01-logos/troid/05.jpg",
+            "projects/01-logos/troid/06.jpg",
+            "projects/01-logos/troid/07.jpg",
+            "projects/01-logos/troid/08.jpg",
+            "projects/01-logos/troid/09.jpg"
+          ],
+          "link": null,
+          "tag": "LOGO & VISUAL IDENTITY / 2023",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "Troid was a gaming platform focused on buying and selling video games across console and PC platforms. Alongside its online store, the brand also developed content around gaming culture through YouTube and Instagram, including reviews, analysis, and other video content related to the world of games.",
+          "a": "As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Troid. The logo concept was built around the first Persian letter of the brand name (ت), combining its distinctive form with a reference to one of the iconic characters from <em>Space Invaders</em>.\nThis combination created a visual identity that connects the brand's Persian name with a recognizable element of gaming culture, resulting in a playful and distinctive mark suitable for both the gaming platform and its digital content.",
           "credit": null,
           "roles": [
             "Creative Direction",
