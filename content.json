@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-16T11:59:18.939Z",
+  "generated": "2026-08-16T12:01:24.114Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -281,17 +281,17 @@
       "order": 1,
       "works": [
         {
-          "slug": "Divar Hackahton 2025",
+          "slug": "divar-hackathon2025",
           "t": "DIVAR HACKATHON 2025",
           "c": "Divar",
           "y": "2025",
           "r": "Creative Director & Designer",
-          "img": "projects/02-posters/Divar Hackahton 2025/cover.jpg",
+          "img": "projects/02-posters/divar-hackathon2025/cover.jpg",
           "video": null,
           "gallery": [
-            "projects/02-posters/Divar Hackahton 2025/01.jpg",
-            "projects/02-posters/Divar Hackahton 2025/02.jpg",
-            "projects/02-posters/Divar Hackahton 2025/03.jpg"
+            "projects/02-posters/divar-hackathon2025/01.jpg",
+            "projects/02-posters/divar-hackathon2025/02.jpg",
+            "projects/02-posters/divar-hackathon2025/03.jpg"
           ],
           "link": null,
           "tag": "EVENT IDENTITY / HACKATHON / 2025",
