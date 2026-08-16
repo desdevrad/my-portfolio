@@ -212,11 +212,33 @@
   .panel-title b{font-weight:500;font-size:12px;letter-spacing:.24em;color:var(--ice)}
   .panel-title i{font-style:normal;font-size:8px;letter-spacing:.22em;color:var(--dim)}
   .panel-nav{display:flex;align-items:center;gap:6px}
-  .pbtn{font-family:'Azeret Mono',ui-monospace,monospace;font-size:9px;letter-spacing:.18em;
-    color:var(--mute);border:1px solid var(--hair);background:transparent;padding:8px 10px;
+  .pbtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    height:30px;padding:0 10px;line-height:1;
+    font-family:'Azeret Mono',ui-monospace,monospace;font-size:9px;letter-spacing:.18em;
+    color:var(--mute);border:1px solid var(--hair);background:transparent;
     transition:color .2s,background .2s,border-color .2s,opacity .3s}
   .pbtn:hover{color:var(--void);background:var(--ice);border-color:var(--ice)}
   .pbtn[hidden]{display:none}
+  /* icon-only buttons are square, so PREV and NEXT are the same box */
+  .pbtn.ibtn{width:30px;padding:0}
+
+  /* ── marks ────────────────────────────────────────────
+     One geometry, rotated. These used to be text — &larr;
+     &rarr; \2197 \2193 — but Azeret Mono's latin subset
+     carries only some of those codepoints, so the rest fell
+     through to whatever the device had. Each direction then
+     arrived at a different width and weight, which is why the
+     right arrow read bigger than the left one on a phone.
+     Drawn as SVG they are the same shape at every size,
+     independent of the font that happens to load. */
+  .ico{display:block;flex:0 0 auto;width:var(--ico,12px);height:var(--ico,12px);
+    fill:none;stroke:currentColor;stroke-width:2;
+    transform-origin:50% 50%}
+  .ico-r {transform:rotate(0deg)}     /* next     */
+  .ico-l {transform:rotate(180deg)}   /* previous */
+  .ico-u {transform:rotate(-90deg)}   /* up       */
+  .ico-d {transform:rotate(90deg)}    /* download */
+  .ico-ur{transform:rotate(-45deg)}   /* outbound */
   .panel-body{position:relative;flex:1;overflow:hidden}
   .view{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;
     padding:clamp(16px,2.4vw,26px);
@@ -242,10 +264,16 @@
 
   .page{display:flex;flex-direction:column;gap:22px}
   .page-hero{border:1px solid var(--hair);aspect-ratio:16/9;overflow:hidden}
-  .who{display:flex;gap:18px;align-items:flex-start}
-  .who .shot{position:relative;flex:0 0 auto;width:168px;border:1px solid var(--hair);
+  /* Portrait and prose share one grid. A headline, if there is one, spans
+     both columns so it gets the full measure instead of breaking repeatedly
+     in a narrow one; under it the portrait sits beside the bio. On a phone
+     the whole thing collapses to a single column with the portrait leading. */
+  .who{display:grid;grid-template-columns:minmax(0,38%) minmax(0,1fr);
+    gap:0 clamp(16px,2.2vw,24px);align-items:start}
+  .who > h3{grid-column:1/-1;margin-bottom:clamp(14px,1.8vw,20px)}
+  .who .shot{position:relative;width:100%;border:1px solid var(--hair);
     overflow:hidden;line-height:0}
-  .who .shot img{width:100%;aspect-ratio:1;object-fit:cover;display:block;
+  .who .shot img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;
     filter:grayscale(1) contrast(1.04);transition:filter .5s ease,opacity .5s ease}
   body.light .who .shot img{filter:grayscale(1) contrast(1.02) brightness(1.02)}
   .who .shot::after{content:"";position:absolute;inset:0;pointer-events:none;
@@ -255,7 +283,7 @@
     font-family:'Azeret Mono',ui-monospace,monospace;font-size:7px;letter-spacing:.22em;
     color:var(--ice);background:var(--sheet);border-top:1px solid var(--hair);
     padding:4px 6px;text-align:center;line-height:1.4}
-  .who .said{flex:1;min-width:0}
+  .who .said{min-width:0}
   .page-hero svg{width:100%;height:100%;display:block}
   .page h3{font-weight:700;font-size:clamp(19px,2.3vw,26px);letter-spacing:-.01em;
     line-height:1.15;color:var(--ice)}
@@ -271,7 +299,17 @@
     font-family:'Azeret Mono',ui-monospace,monospace;font-size:9.5px;letter-spacing:.14em;
     color:var(--ice);transition:color .2s,padding-left .25s}
   .rows a:hover{color:var(--dim);padding-left:8px}
-  .rows em{font-style:normal;color:var(--dim);font-size:8.5px;letter-spacing:.2em;text-align:right}
+  .rows em{display:flex;align-items:center;justify-content:flex-end;gap:.85em;align-self:center;
+    font-style:normal;color:var(--dim);font-size:8.5px;letter-spacing:.2em;text-align:right}
+  .rows em .ico{--ico:11px}
+
+  /* skill tags — same chip as a project's tag row, so the two read as one
+     family. Each group is its own .block, matching DOCUMENTS / ELSEWHERE. */
+  .taglist{display:flex;flex-wrap:wrap;gap:6px}
+  .taglist span{font-family:'Azeret Mono',ui-monospace,monospace;font-size:8.5px;
+    letter-spacing:.16em;color:var(--mute);border:1px solid var(--hair);padding:6px 9px;
+    transition:border-color .25s,color .25s}
+  .taglist span:hover{border-color:var(--line);color:var(--ice)}
   .lede{font-size:13.5px;line-height:1.6;color:var(--mute)}
   .mail{font-weight:700;font-size:clamp(17px,2.4vw,25px);letter-spacing:-.01em;
     color:var(--ice);text-decoration:none;word-break:break-all}
@@ -404,7 +442,8 @@
     transition:color .2s,background .2s,border-color .2s}
   .lens-btn:hover,.lens-btn:focus-visible{color:var(--void);background:var(--ice);border-color:var(--ice)}
   .lens-btn[hidden]{display:none}
-  .lens-x{top:clamp(14px,3vw,26px);right:clamp(14px,3vw,26px);font-size:18px}
+  .lens-btn .ico{--ico:16px}
+  .lens-x{top:clamp(14px,3vw,26px);right:clamp(14px,3vw,26px)}
   .lens-prev{left:clamp(10px,2.4vw,26px);top:50%;transform:translateY(-50%)}
   .lens-next{right:clamp(10px,2.4vw,26px);top:50%;transform:translateY(-50%)}
   .lens-count{position:absolute;z-index:2;left:50%;transform:translateX(-50%);
@@ -480,12 +519,14 @@
       transform:translateY(12px)}
     .explore.on .chip{transform:none}
     .chip.hot{transform:none}
-    .who{flex-direction:column;gap:14px}
-    .who .shot{width:150px}
+    .who{grid-template-columns:1fr;gap:16px}
+    .who > h3{margin-bottom:0}
+    .who .shot{order:-1;width:min(64%,210px)}
     .clients{grid-template-columns:repeat(2,1fr)}
 
-    /* the glyph carries the meaning on its own here */
+    /* the mark carries the meaning on its own here */
     #pclose .lbl{display:none}
+    #pclose{width:30px;padding:0}
     .gal{grid-template-columns:1fr 1fr;gap:8px}
 
     .lens-stage{padding:60px 14px 84px}
@@ -534,10 +575,10 @@
       <i id="panelsub">04 WORKS</i>
     </span>
     <div class="panel-nav">
-      <button class="pbtn" id="pprev" type="button" data-tag="PREV" hidden>&larr;</button>
-      <button class="pbtn" id="pnext" type="button" data-tag="NEXT" hidden>&rarr;</button>
+      <button class="pbtn ibtn" id="pprev" type="button" data-tag="PREV" hidden aria-label="Previous work"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.2 12h16.2"/><path d="M13.4 6l6 6-6 6"/></svg></button>
+      <button class="pbtn ibtn" id="pnext" type="button" data-tag="NEXT" hidden aria-label="Next work"><svg class="ico ico-r" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.2 12h16.2"/><path d="M13.4 6l6 6-6 6"/></svg></button>
       <button class="pbtn" id="pback" type="button" data-tag="BACK" hidden>INDEX</button>
-      <button class="pbtn" id="pclose" type="button" data-tag="CLOSE" aria-label="Close"><span class="lbl">CLOSE </span>&times;</button>
+      <button class="pbtn" id="pclose" type="button" data-tag="CLOSE" aria-label="Close"><span class="lbl">CLOSE</span><svg class="ico ico-x" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14"/><path d="M19 5L5 19"/></svg></button>
     </div>
   </div>
   <div class="panel-body">
@@ -555,9 +596,9 @@
 <div class="lens" id="lens" hidden role="dialog" aria-modal="true" aria-label="Project images">
   <div class="lens-bg" id="lensbg"></div>
   <figure class="lens-stage"><img id="lensimg" alt=""></figure>
-  <button class="lens-btn lens-x" id="lensclose" type="button" data-tag="CLOSE" aria-label="Close">&times;</button>
-  <button class="lens-btn lens-prev" id="lensprev" type="button" data-tag="PREV" aria-label="Previous image">&larr;</button>
-  <button class="lens-btn lens-next" id="lensnext" type="button" data-tag="NEXT" aria-label="Next image">&rarr;</button>
+  <button class="lens-btn lens-x" id="lensclose" type="button" data-tag="CLOSE" aria-label="Close"><svg class="ico ico-x" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14"/><path d="M19 5L5 19"/></svg></button>
+  <button class="lens-btn lens-prev" id="lensprev" type="button" data-tag="PREV" aria-label="Previous image"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.2 12h16.2"/><path d="M13.4 6l6 6-6 6"/></svg></button>
+  <button class="lens-btn lens-next" id="lensnext" type="button" data-tag="NEXT" aria-label="Next image"><svg class="ico ico-r" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.2 12h16.2"/><path d="M13.4 6l6 6-6 6"/></svg></button>
   <div class="lens-count" id="lenscount"><b id="lensnow">01</b><i>/</i><span id="lenstotal">01</span></div>
 </div>
 
@@ -1866,8 +1907,7 @@ function openField(i){
     const c = document.createElement('button');
     c.type = 'button'; c.className = 'card'; c.dataset.tag = 'OPEN';
     c.innerHTML = '<span class="thumb">'+workMedia(w, f, i*97 + k*13 + 5, true)+'</span>' +
-      '<span class="meta"><b>'+esc(w.t)+'</b><span>'+
-        esc([w.y, w.r].filter(Boolean).join(' \u2014 '))+'</span></span>';
+      '<span class="meta"><b>'+esc(w.t)+'</b><span>'+esc(w.y || '')+'</span></span>';
     c.style.opacity = '0'; c.style.transform = 'translateY(16px)';
     c.addEventListener('pointerenter', ()=>blip(1180, 0.026));
     watchVideo(c.querySelector('video'));
@@ -2585,19 +2625,38 @@ requestAnimationFrame(frame);
    clients/ or replacing about/cv.pdf is the whole workflow — this file
    never needs to change. */
 
-const rows_ = list => list.map(([label, value, href]) => href
-  ? '<a href="'+esc(href)+'"'+(/^https?:/i.test(href) ? ' target="_blank" rel="noopener"' : '') +
-    ' data-tag="'+esc(label)+'">'+esc(label)+'<em>'+esc(value)+'</em></a>'
-  : '<span>'+esc(label)+'<em>'+esc(value)+'</em></span>'
-).join('');
+/* the one arrow, pointed wherever it is needed: 'r' 'l' 'u' 'd' 'ur' */
+const ico_ = dir =>
+  '<svg class="ico ico-'+dir+'" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+    '<path d="M3.2 12h16.2"/><path d="M13.4 6l6 6-6 6"/></svg>';
+
+/* [label, value, href, mark] — mark is a direction for ico_ */
+const rows_ = list => list.map(([label, value, href, mark]) => {
+  const inner = esc(label) + '<em>' + esc(value) + (mark ? ico_(mark) : '') + '</em>';
+  return href
+    ? '<a href="'+esc(href)+'"'+(/^https?:/i.test(href) ? ' target="_blank" rel="noopener"' : '') +
+      ' data-tag="'+esc(label)+'">'+inner+'</a>'
+    : '<span>'+inner+'</span>';
+}).join('');
 
 const block_ = (title, inner) =>
   '<div class="block"><b>'+esc(title)+'</b><div class="rows">'+inner+'</div></div>';
 
+/* same block furniture, chips instead of rows */
+const tagblock_ = (title, items) =>
+  '<div class="block"><b>'+esc(title)+'</b><div class="taglist">' +
+  items.map(s=>'<span>'+esc(s)+'</span>').join('') + '</div></div>';
+
+/* about.skills is [{ label, items }] — one block per group */
+const skills_ = groups => (groups || [])
+  .filter(g => g && g.items && g.items.length)
+  .map(g => tagblock_((g.label || 'SKILLS').toUpperCase(), g.items))
+  .join('');
+
 const elsewhere_ = links => {
   const entries = Object.entries(links || {});
   return entries.length
-    ? block_('ELSEWHERE', rows_(entries.map(([k, v]) => [k.toUpperCase(), '\u2197', v])))
+    ? block_('ELSEWHERE', rows_(entries.map(([k, v]) => [k.toUpperCase(), '', v, 'ur'])))
     : '';
 };
 
@@ -2632,21 +2691,18 @@ function buildPages(c){
   pages.ABOUT = {
     sub: (site.role || 'PROFILE').toUpperCase(),
     html: ()=>
-      '<div class="who">' + shot +
-        '<div class="said">' +
-          (about.headline ? '<h3>'+esc(about.headline)+'</h3>' : '') +
-          (paras[0] ? '<p>'+paras[0]+'</p>' : '') +
-        '</div>' +
+      '<div class="who">' +
+        (about.headline ? '<h3>'+esc(about.headline)+'</h3>' : '') +
+        shot +
+        '<div class="said">' + paras.map(p=>'<p>'+p+'</p>').join('') + '</div>' +
       '</div>' +
-      paras.slice(1).map(p=>'<p>'+p+'</p>').join('') +
+      skills_(about.skills) +
       (cv ? block_('DOCUMENTS', rows_([[
         'CURRICULUM VITAE',
-        'PDF \u00b7 ' + cv.size + ' \u00b7 ' + cv.updated + ' \u2193',
-        cv.src + (cv.hash ? '?v=' + cv.hash : '')
+        'PDF \u00b7 ' + cv.size + ' \u00b7 ' + cv.updated,
+        cv.src + (cv.hash ? '?v=' + cv.hash : ''),
+        'd'
       ]])) : '') +
-      (c.fields && c.fields.length
-        ? block_('PRACTICE', rows_(c.fields.map(f=>[f.key, f.sub])))
-        : '') +
       elsewhere_(site.links)
   };
 
@@ -2668,7 +2724,7 @@ function buildPages(c){
       (clients.lede ? '<p class="lede">'+esc(clients.lede)+'</p>' : '') +
       (tiles ? '<div class="clients">'+tiles+'</div>' : '') +
       (engagements.length
-        ? block_('ENGAGEMENTS', rows_(engagements.map(e=>[e.name, e.scope + (e.year ? ' \u2014 ' + e.year : '')])))
+        ? block_('ENGAGEMENTS', rows_(engagements.map(e=>[e.name, e.year || ''])))
         : '') +
       (logos.length ? '' : '<p class="note">Drop a logo into clients/ and it appears here.</p>')
   };
