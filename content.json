@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-17T08:27:50.532Z",
+  "generated": "2026-08-17T09:31:36.997Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -124,6 +124,11 @@
       },
       {
         "name": "RUSHIN",
+        "scope": "CREATIVE DIRECTION",
+        "year": "2024"
+      },
+      {
+        "name": "XENSE",
         "scope": "CREATIVE DIRECTION",
         "year": "2024"
       },
@@ -310,6 +315,55 @@
           "la": "CONTRIBUTION",
           "b": "Rushin is an educational and research-focused event platform designed to support academic and intellectual development through workshops, courses, field visits, camps, and hands-on learning experiences.\nThe visual identity explores the connection between the human mind, nature, and generative systems. The central concept draws from the visual language of the brain and tree structures, using the branching logic of a fractal canopy as a metaphor for learning, growth, and the continuous expansion of knowledge.",
           "a": "As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Rushin. The design system was built around the idea of a “fractal canopy”, combining organic branching structures with the visual complexity of the brain and generative patterns.\nThe identity translates these ideas into a flexible visual language that represents knowledge as a growing, interconnected system, where each new idea creates the potential for further exploration and discovery.",
+          "credit": null,
+          "roles": [
+            "Creative Direction",
+            "Logo Design",
+            "Visual Identity Design"
+          ]
+        },
+        {
+          "slug": "xense",
+          "t": "XENSE",
+          "c": "Xense",
+          "y": "2024",
+          "r": "Creative Director & Designer",
+          "img": "projects/01-logos/xense/cover.jpg",
+          "video": null,
+          "gallery": [
+            "projects/01-logos/xense/01.jpg",
+            "projects/01-logos/xense/02.jpg",
+            "projects/01-logos/xense/03.jpg",
+            "projects/01-logos/xense/04.jpg",
+            "projects/01-logos/xense/05.jpg",
+            "projects/01-logos/xense/06.jpg",
+            "projects/01-logos/xense/07.jpg",
+            "projects/01-logos/xense/08.jpg",
+            "projects/01-logos/xense/09.jpg",
+            "projects/01-logos/xense/10.jpg",
+            "projects/01-logos/xense/11.jpg",
+            "projects/01-logos/xense/12.jpg",
+            "projects/01-logos/xense/13.jpg",
+            "projects/01-logos/xense/14.jpg",
+            "projects/01-logos/xense/15.jpg",
+            "projects/01-logos/xense/16.jpg",
+            "projects/01-logos/xense/17.jpg",
+            "projects/01-logos/xense/18.jpg",
+            "projects/01-logos/xense/19.jpg",
+            "projects/01-logos/xense/20.jpg",
+            "projects/01-logos/xense/21.jpg",
+            "projects/01-logos/xense/22.jpg",
+            "projects/01-logos/xense/23.jpg",
+            "projects/01-logos/xense/24.jpg",
+            "projects/01-logos/xense/25.jpg",
+            "projects/01-logos/xense/26.jpg"
+          ],
+          "link": null,
+          "tag": "LOGO & VISUAL IDENTITY / 2024",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "Xense is a Canadian company focused on the development and production of biosensors for the detection and measurement of target substances. Its technologies have applications across fields including medicine, agriculture, and industrial wastewater treatment, bringing sensing and measurement technologies into a range of scientific and practical contexts.",
+          "a": "As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Xense. The identity brings together four core concepts connected to the company's name and field: the letter “X” as the first letter of Xense, light as the fundamental medium that allows us to see, the atom as the basic building block of chemistry, and the eye as the sensory organ associated with sight.\nThese elements were combined into a unified visual language that connects sensing, visibility, and the microscopic world of chemistry, creating a distinctive identity rooted in the scientific nature of the company.",
           "credit": null,
           "roles": [
             "Creative Direction",
