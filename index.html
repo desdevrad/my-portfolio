@@ -674,8 +674,17 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 
-/* ══ model ════════════════════════════════════════════════════════════════ */
-const MODEL_URL = 'model/logo.glb';   // swap this file to try a different model — see model/README.md
+/* ══ model ════════════════════════════════════════════════════════════════
+   model/logo.glb is the form that is standing every time the page loads —
+   that filename is fixed, so the first thing a visitor sees never changes.
+   Every other .glb dropped into model/ becomes something the form can turn
+   into. tools/build-content.mjs scans the folder and lists them under
+   "models" in content.json, so nothing here has to know how many there are:
+   add a file, push, and the next tap can land on it. See model/README.md. */
+const MODEL_DIR   = 'model/';
+const MODEL_FIRST = 'logo.glb';       // the one on load — keep this name
+const MODEL_URL   = MODEL_DIR + MODEL_FIRST;
+const MAX_ALTS    = 12;               // how many extra forms are held in memory
 const FIT = 3.0;                      // on-screen height of the form, world units
 const BACK_Z = -6;
 
@@ -982,7 +991,11 @@ function normalize(geo){
   geo.scale(k,k,k);
   geo.computeBoundingBox(); geo.computeBoundingSphere();
   const fitted = geo.boundingBox.getSize(new THREE.Vector3());
-  letterW = fitted.x; letterH = fitted.y;
+  // every form is fitted to the same box, so the framing carries over and a
+  // morph never jumps in scale. The dims ride on the geometry rather than in
+  // a global, since forms are now normalized long before they are shown.
+  geo.userData.fitW = fitted.x;
+  geo.userData.fitH = fitted.y;
   return geo;
 }
 
@@ -1007,6 +1020,7 @@ let matte, glass, outline, wire, wireThru, ready = false;
 function build(geo){
   normalize(geo);
   letterGeo = geo;
+  letterW = geo.userData.fitW; letterH = geo.userData.fitH;
   const T = TH();
 
   matte = new THREE.Mesh(geo, zoneify(new THREE.MeshStandardMaterial({
@@ -1059,9 +1073,15 @@ function build(geo){
   group.add(glass);
 
   ready = true;
+  // slot zero of the bench is whatever loaded first, and it already owns the
+  // edge and wireframe passes — no need to cut them a second time
+  forms[0] = { url:MODEL_URL, geo, edges:outline.geometry, wireGeo:wire.geometry };
+  formIx = 0;
   try{ resize(); }catch(e){}     // refit now that the real proportions are known
   // the grains are only needed on the first tap, so they can wait a couple of frames
   setTimeout(()=>{ try{ buildDust(); }catch(e){} }, 90);
+  // the rest of the folder loads behind the intro, so the first paint is unaffected
+  setTimeout(loadBench, 1200);
 }
 
 const boot = document.getElementById('boot');
@@ -1082,6 +1102,101 @@ new GLTFLoader().load(
   }
 );
 
+/* ══ the bench: every form the letter can become ══════════════════════════
+   Slot zero is model/logo.glb and is what stands on load. The others arrive
+   afterwards, one at a time and only once the first form is up, so a folder
+   with a dozen models still costs the visitor nothing at first paint. The
+   count is never hard-coded anywhere — the list comes from content.json.
+
+   Each slot carries its geometry plus the two derived passes a swap needs
+   (edges, wireframe). Cutting those on load rather than mid-flight is the
+   difference between a morph that lands clean and one that hitches on the
+   frame it hands over. */
+
+const forms = [];                 // { url, geo, edges, wireGeo }
+let formIx = 0;                   // which one is standing right now
+let nextIx = -1;                  // which one the next tap will bring in
+let benchList = null, benchLoading = false;
+
+const idle = fn => (window.requestIdleCallback
+  ? requestIdleCallback(()=>fn(), { timeout:1500 })
+  : setTimeout(fn, 60));
+
+/* content.json is the source of truth; model/models.json is a hand-written
+   fallback for anyone serving the folder without running the build script. */
+function setBench(list){
+  benchList = (list || [])
+    .filter(n => typeof n === 'string' && /\.(glb|gltf)$/i.test(n))
+    .map(n => n.indexOf('/') >= 0 ? n : MODEL_DIR + n)
+    .filter(u => u !== MODEL_URL);
+  loadBench();
+}
+
+function loadBench(){
+  if(benchLoading || !benchList || !benchList.length || !ready) return;
+  benchLoading = true;
+  const queue = benchList.slice(0, MAX_ALTS);
+  const loader = new GLTFLoader();
+
+  (function next(){
+    const url = queue.shift();
+    if(!url){ benchLoading = false; return; }
+    loader.load(url, gltf=>{
+      try{
+        const geo = flatten(gltf.scene);
+        if(geo){
+          normalize(geo);
+          const f = { url, geo, edges:null, wireGeo:null };
+          forms.push(f);
+          // the two heavy derivations, spread over separate idle slices
+          idle(()=>{
+            f.edges = new THREE.EdgesGeometry(geo, 20);
+            idle(()=>{ f.wireGeo = new THREE.WireframeGeometry(geo); });
+          });
+          if(nextIx < 0) chooseNext();       // the first arrival unlocks morphing
+        }
+      }catch(err){ console.warn('[model]', url, err); }
+      idle(next);
+    }, undefined, ()=>{
+      console.warn('[model] could not load ' + url);
+      idle(next);
+    });
+  })();
+}
+
+/* The next destination is drawn as soon as the current one lands, not at the
+   moment of the tap — which leaves a whole idle window to sample its cloud
+   and pair the grains, so the tap itself is free. The current form is left
+   out of the draw, so nothing ever morphs into what it already is. */
+function chooseNext(){
+  const pool = [];
+  for(let i=0;i<forms.length;i++) if(i !== formIx && forms[i] && forms[i].geo) pool.push(i);
+  nextIx = pool.length ? pool[(Math.random()*pool.length)|0] : -1;
+  if(nextIx >= 0) idle(()=>{ if(dustReady) pairFor(cid(formIx,0), cid(nextIx,0)); });
+}
+
+// handed over halfway through the flight, while the solid is fully faded out
+function swapForm(i){
+  const f = forms[i];
+  if(!f || !f.geo || !ready) return;
+  formIx = i;
+  letterGeo = f.geo;
+  letterW = f.geo.userData.fitW || letterW;
+  letterH = f.geo.userData.fitH || letterH;
+
+  matte.geometry = f.geo;
+  glass.geometry = f.geo;
+  glass.material.thickness = Math.max(f.geo.boundingBox.getSize(new THREE.Vector3()).z, 0.6);
+
+  if(!f.edges)   f.edges   = new THREE.EdgesGeometry(f.geo, 20);
+  if(!f.wireGeo) f.wireGeo = new THREE.WireframeGeometry(f.geo);
+  outline.geometry  = f.edges;
+  wire.geometry     = f.wireGeo;
+  wireThru.geometry = f.wireGeo;
+
+  try{ resize(); }catch(e){}     // proportions differ between forms
+}
+
 
 /* ══ dust: the letter comes apart and puts itself back together ═══════════
    The form is sampled twice into two clouds of equal size. A kd-tree walks
@@ -1098,9 +1213,39 @@ const PN = reduce ? 3200 : (coarse ? 5200 : 9000);
 const MORPH_T = reduce ? 0.85 : 1.35;
 
 let letterGeo = null, formFade = 1;
-let cloudA = null, cloudB = null, pairAB = null;
 let dust = null, dustMat = null, dustReady = false;
 let morph = null, queued = 0;
+
+/* A cloud belongs to a form, not to the morph, so it is cut once and kept.
+   `variant` exists only for the case of a single model in the folder, where
+   the departure and arrival clouds have to be two different samplings of the
+   same surface or every grain would already be home. */
+const clouds = new Map();     // "form#variant" -> { pos, nrm }
+const pairs  = new Map();     // "from>to"      -> permutation
+const cid = (i, v) => i + '#' + v;
+
+function cloudById(id){
+  let c = clouds.get(id);
+  if(c) return c;
+  const parts = id.split('#'), i = +parts[0], v = +parts[1];
+  const f = forms[i];
+  if(!f || !f.geo) return null;
+  c = sampleCloud(f.geo, 9001 + i*7919 + v*4703);
+  clouds.set(id, c);
+  return c;
+}
+
+function pairFor(idA, idB){
+  const k = idA + '>' + idB;
+  let p = pairs.get(k);
+  if(p) return p;
+  const A = cloudById(idA), B = cloudById(idB);
+  if(!A || !B) return null;
+  p = kdPair(A.pos, B.pos);
+  if(pairs.size > 40) pairs.clear();      // n forms have n² routes between them
+  pairs.set(k, p);
+  return p;
+}
 
 function sstep(x){
   x = Math.min(1, Math.max(0, x));
@@ -1257,11 +1402,14 @@ function buildDust(){
   dust.visible = false;
   group.add(dust);
 
-  // sampling and pairing are chunked so the frames right after boot stay smooth
+  // sampling and pairing are chunked so the frames right after boot stay smooth.
+  // What is warmed here is the standing form's own departure cloud plus the
+  // self-morph fallback, which is all that can be needed before the rest of
+  // the folder has arrived; cross-form pairs are warmed by chooseNext().
   const jobs = [
-    ()=>{ cloudA = sampleCloud(letterGeo, 9001); },
-    ()=>{ cloudB = sampleCloud(letterGeo, 4703); },
-    ()=>{ pairAB = kdPair(cloudA.pos, cloudB.pos); },
+    ()=>{ cloudById(cid(formIx,0)); },
+    ()=>{ cloudById(cid(formIx,1)); },
+    ()=>{ pairFor(cid(formIx,0), cid(formIx,1)); },
     ()=>{
       dustReady = true;
       sizeDust(); syncDust();
@@ -1287,14 +1435,18 @@ function sizeDust(){
   if(dustMat) dustMat.uniforms.uPx.value = VH * DPR / (2*Math.tan(FOV*Math.PI/360));
 }
 
-function armDust(hit){
-  if(!dust || !cloudA || !cloudB || !pairAB) return false;
+function armDust(hit, idA, idB){
+  if(!dust) return false;
+  const A = cloudById(idA), B = cloudById(idB);
+  if(!A || !B) return false;
+  const perm = pairFor(idA, idB);
+  if(!perm) return false;
   const g = dust.geometry;
   const p = g.attributes.position.array, t = g.attributes.aTo.array, n = g.attributes.aNrm.array;
-  p.set(cloudA.pos); n.set(cloudA.nrm);
+  p.set(A.pos); n.set(A.nrm);
   for(let i=0;i<PN;i++){
-    const j = pairAB[i]*3, o = i*3;
-    t[o] = cloudB.pos[j]; t[o+1] = cloudB.pos[j+1]; t[o+2] = cloudB.pos[j+2];
+    const j = perm[i]*3, o = i*3;
+    t[o] = B.pos[j]; t[o+1] = B.pos[j+1]; t[o+2] = B.pos[j+2];
   }
   g.attributes.position.needsUpdate = true;
   g.attributes.aTo.needsUpdate = true;
@@ -1309,9 +1461,16 @@ function startMorph(hit){
   if(!ready) return;
   if(morph){ queued = 1; return; }              // a tap mid-flight still counts
   if(!dustReady){ queued = 1; return; }         // the grains are still being cut
-  if(!armDust(hit)) return;
 
-  morph = { t:0, sealed:false };
+  // where it is going was decided when the last morph landed. With only one
+  // model in the folder there is nowhere to go, and the form comes apart and
+  // puts itself back together as before — the folder can grow later.
+  const to = (nextIx >= 0 && forms[nextIx] && forms[nextIx].geo) ? nextIx : -1;
+  const idA = cid(formIx, 0);
+  const idB = to >= 0 ? cid(to, 0) : cid(formIx, 1);
+  if(!armDust(hit, idA, idB)) return;
+
+  morph = { t:0, sealed:false, swapped:false, to };
   dustMat.uniforms.uSwirl.value *= -1;          // the twist alternates, so no two are alike
   dust.visible = true;
   formFade = 1;
@@ -1330,6 +1489,14 @@ function stepMorph(dt){
   // the solid lets go early and is back before the grains have finished settling
   formFade = Math.max(1 - sstep(k/0.17), sstep((k - 0.78)/0.22));
 
+  // the handover happens in the gap where the solid is fully out — from 0.17
+  // to 0.78 there is nothing on screen but grains, so the geometry underneath
+  // can be exchanged without anything being seen to change
+  if(!morph.swapped && k > 0.45){
+    morph.swapped = true;
+    if(morph.to >= 0) swapForm(morph.to);
+  }
+
   if(!morph.sealed && k > 0.83){                // a ring closes over the letter again
     morph.sealed = true;
     spawnRing(new THREE.Vector3(0,0,0.34), new THREE.Vector3(0,0,1), 0);
@@ -1339,6 +1506,7 @@ function stepMorph(dt){
     morph = null;
     dust.visible = false;
     formFade = 1;
+    chooseNext();                               // and the next draw begins warming
     if(queued){ queued = 0; startMorph(null); }
   }
 }
@@ -1926,6 +2094,9 @@ function openPage(k){
 }
 
 function openField(i){
+  // reaching for a discipline turns the form too, so the mark behind the panel
+  // is never the one that was standing when the visitor arrived
+  startMorph(null);
   fieldIx = i; workIx = -1;
   const f = FIELDS[i];
   haltMedia(gridEl);
@@ -2965,7 +3136,24 @@ document.addEventListener('click', e=>{
 const yearEl = document.getElementById('year');
 if(yearEl) yearEl.textContent = String(new Date().getFullYear());
 
+/* the model folder is inventoried by the same build step as everything else,
+   so a new .glb needs no edit here. The fallback covers a folder served
+   without the build script having run. */
+function bootBench(c){
+  const m = c && c.models;
+  let list = [];
+  if(Array.isArray(m)) list = m;
+  else if(m && typeof m === 'object') list = m.alts || m.models || [];
+  if(list.length){ setBench(list); return; }
+
+  fetch(MODEL_DIR + 'models.json', { cache:'no-cache' })
+    .then(r => r.ok ? r.json() : null)
+    .then(j => { if(j) setBench(Array.isArray(j) ? j : (j.alts || j.models || [])); })
+    .catch(()=>{});
+}
+
 function applyContent(c){
+  bootBench(c);
   FIELDS = c.fields || [];
   PAGES = buildPages(c);
 
@@ -2982,6 +3170,7 @@ fetch('content.json', { cache: 'no-cache' })
   .then(applyContent)
   .catch(err=>{
     console.error('[content]', err);
+    bootBench(null);          // the forms are independent of the site index
     document.getElementById('practice').textContent = 'CONTENT UNAVAILABLE';
     PAGES = { ABOUT: { sub:'UNAVAILABLE', html:()=>
       '<p class="lede">The site index could not be loaded.</p>' +

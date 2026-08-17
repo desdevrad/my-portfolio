@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-17T11:54:33.752Z",
+  "generated": "2026-08-17T17:48:55.269Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -143,6 +143,15 @@
         "scope": "CREATIVE DIRECTION",
         "year": "2023"
       }
+    ]
+  },
+  "models": {
+    "primary": "logo.glb",
+    "alts": [
+      "02.glb",
+      "03.glb",
+      "04.glb",
+      "05.glb"
     ]
   },
   "fields": [
@@ -470,6 +479,33 @@
             "Event Branding",
             "Apparel Design"
           ]
+        }
+      ]
+    },
+    {
+      "key": "3D",
+      "sub": "FORM & RENDER",
+      "kind": 2,
+      "order": 2,
+      "works": [
+        {
+          "slug": "3d-threads",
+          "t": "D THREADS",
+          "c": "",
+          "y": "",
+          "r": "",
+          "img": "projects/03-3D/3d-threads/cover.jpg",
+          "video": null,
+          "gallery": [
+            "projects/03-3D/3d-threads/01.jpg"
+          ],
+          "link": null,
+          "tag": null,
+          "lb": null,
+          "la": null,
+          "b": "",
+          "a": "",
+          "credit": null
         }
       ]
     },
