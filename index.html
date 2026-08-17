@@ -65,6 +65,20 @@
   }
   @media (pointer:fine){
     html,body,#gl,.hud,.hud a,.fx,.chip,.panel,.panel *,.lens,.lens *,button{cursor:none}
+
+    /* ── the pointer comes back for fullscreen video ────
+       The reticle that stands in for the cursor is an element of the page,
+       and a fullscreen <video> paints over the page entirely — so inside
+       fullscreen there was nothing to aim with at all: the custom cursor was
+       covered along with everything else, and the real one was suppressed by
+       the rule above. That left the browser's own control bar as the only way
+       back out and no way to point at it, so Esc was the only exit. While
+       anything is fullscreen the real cursor is handed back. Both the
+       standard and the -webkit- selector are written as separate rules, since
+       a browser that does not know one of them would drop the whole list. */
+    :fullscreen,:fullscreen *{cursor:auto}
+    :-webkit-full-screen,:-webkit-full-screen *{cursor:auto}
+    body.fs,body.fs *{cursor:auto}
   }
   #gl{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;
     display:block;z-index:0;touch-action:none}
@@ -2541,6 +2555,29 @@ const ret = document.getElementById('ret');
 const retTag = document.getElementById('rettag');
 const fpsOut = document.getElementById('fps');
 
+/* Fullscreen is the one state where the site's own cursor cannot follow: the
+   video is painted over the whole page, reticle included. The CSS hands the
+   real pointer back; this puts the reticle away while it is gone, so nothing
+   is chasing a cursor nobody can see, and returns it on the way out. The
+   body flag exists because the fullscreen pseudo-classes are inconsistently
+   applied to media elements across engines — the class is not. */
+const fsOn = ()=> !!(document.fullscreenElement || document.webkitFullscreenElement);
+let retWasOn = false;
+
+function syncFullscreen(){
+  const on = fsOn();
+  document.body.classList.toggle('fs', on);
+  if(on){
+    retWasOn = ret.classList.contains('on');
+    ret.classList.remove('on');
+  }else if(retWasOn){
+    retWasOn = false;
+    ret.classList.add('on');
+  }
+}
+document.addEventListener('fullscreenchange', syncFullscreen);
+document.addEventListener('webkitfullscreenchange', syncFullscreen);
+
 const raycaster = new THREE.Raycaster();
 const ndcPt = new THREE.Vector2();
 const target = new THREE.Vector3();
@@ -2601,6 +2638,7 @@ addEventListener('pointermove', e=>{
   rGoal = 1;
   if(!touched) touched = true;
   if(coarse) return;
+  if(fsOn()) return;      // the real cursor has the room; nothing to stand in for
 
   ret.classList.add('on');
 
