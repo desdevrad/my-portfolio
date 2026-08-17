@@ -2584,7 +2584,7 @@ let reveal = 0;   // how open the wireframe reveal is — mouse hover only, neve
 const ndc = new THREE.Vector3();
 let mx=0, my=0, px=0, py=0, touched=false, clock=0, intro=0, radius=0, rGoal=0;
 let pointerX = innerWidth/2, pointerY = innerHeight/2, retX = pointerX, retY = pointerY;
-let VX = 0, VY = 0, VW = innerWidth, VH = innerHeight, visH = 4.5, centreY = 0, formScale = 1;
+let VX = 0, VY = 0, VW = innerWidth, VH = innerHeight, visH = 4.5, centreY = 0, formScale = 1, formScaleGoal = 1;
 let letterW = 2.1, letterH = FIT;
 const cxMid = ()=> VX + VW/2;
 const cyMid = ()=> VY + VH/2;
@@ -2858,7 +2858,9 @@ function fitView(){
   camera.updateProjectionMatrix();
 
   const idealVisH = Math.max(letterH * VH / (freeH * hFrac), letterW / (wFrac * aspect), 3.4);
-  formScale = visH / idealVisH;
+  formScaleGoal = visH / idealVisH;
+  // the frame loop eases formScale toward this goal rather than snapping to
+  // it here, so a model swap settles into its new size instead of popping.
 
   // put the form in the middle of the free band rather than the middle of the glass
   const centrePx = band.t + freeH/2;
@@ -2961,6 +2963,10 @@ function frame(now){
     group.rotation.z = Math.sin(clock*0.41)*0.045;
     group.position.x = groupX;
     group.position.y = centreY + Math.sin(clock*1.15)*0.1;
+    // the target size a swap asks for is reached gradually rather than in
+    // one jump, so a much bigger or smaller form eases into place
+    formScale += (formScaleGoal - formScale) * (reduce ? 0.18 : 0.09);
+
     group.scale.setScalar(formScale * (0.9 + 0.1*ease) * (panelOpen && VW > 900 ? 0.86 : 1));
 
     stepMorph(dt);
