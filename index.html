@@ -1488,7 +1488,6 @@ function startMorph(hit){
   dustMat.uniforms.uSwirl.value *= -1;          // the twist alternates, so no two are alike
   dust.visible = true;
   formFade = 1;
-  spinV += (reduce ? 0.006 : 0.019);            // a nudge, so the turn carries through
   morphSound();
 }
 
@@ -2585,31 +2584,11 @@ let reveal = 0;   // how open the wireframe reveal is — mouse hover only, neve
 const ndc = new THREE.Vector3();
 let mx=0, my=0, px=0, py=0, touched=false, clock=0, intro=0, radius=0, rGoal=0;
 let pointerX = innerWidth/2, pointerY = innerHeight/2, retX = pointerX, retY = pointerY;
-let VX = 0, VY = 0, VW = innerWidth, VH = innerHeight, visH = 4.5, centreY = 0;
+let VX = 0, VY = 0, VW = innerWidth, VH = innerHeight, visH = 4.5, centreY = 0, formScale = 1;
 let letterW = 2.1, letterH = FIT;
 const cxMid = ()=> VX + VW/2;
 const cyMid = ()=> VY + VH/2;
-let spin = 0, spinV = 0, groupX = 0, spinKick = null;
-
-// a tap on the form spins it one full turn about the vertical axis. Rather
-// than decelerating straight into a stop — which reads as an abrupt halt no
-// matter how eased the curve — it overshoots the turn slightly and rocks
-// back to settle exactly on it, the way you'd shape it with an overshoot
-// keyframe in After Effects' graph editor: fast out, past the mark, a soft
-// return, done. Runs on its own clock rather than the drag/flick physics
-// below, so it can't be interrupted or slowed by residual momentum.
-function easeOvershoot(x, overshoot){
-  const c3 = overshoot + 1;
-  return 1 + c3 * Math.pow(x - 1, 3) + overshoot * Math.pow(x - 1, 2);
-}
-// which way the turn goes is a coin toss on every tap, so the form never
-// settles into a single learned direction. A run of the same side is left
-// alone rather than forced to alternate — real randomness is the point.
-function quickSpin(){
-  if(reduce) return;              // respect prefers-reduced-motion
-  const dir = Math.random() < 0.5 ? -1 : 1;
-  spinKick = { from: spin, dir, t0: performance.now(), dur: 900 };
-}
+let spin = 0, spinV = 0, groupX = 0;
 
 // the reticle invites you in, then tells you what a tap will do
 function syncTag(){
@@ -2746,7 +2725,6 @@ function letGo(e){
   if(!hit){ refreshExplore(); return; }
   strikeAt(hit);
   startMorph(matte ? matte.worldToLocal(hit.point.clone()) : null);
-  quickSpin();
   hoverForm = true;
   refreshExplore();
 }
@@ -2868,10 +2846,19 @@ function fitView(){
   const wFrac = stacked() ? 0.74 : 0.60;      // of the full width
   const aspect = VW / VH;
 
-  visH = Math.max(letterH * VH / (freeH * hFrac), letterW / (wFrac * aspect), 3.4);
+  // the camera is framed against a fixed FIT×FIT reference box rather than
+  // whichever shape is currently on screen, so swapping to a taller or wider
+  // form never moves the camera itself — that would drag the background
+  // field and everything else along with it. Only the form is rescaled, by
+  // however much its own letterW/letterH fall short of the reference, so it
+  // still lands on the same target fraction of the frame every time.
+  visH = Math.max(FIT * VH / (freeH * hFrac), FIT / (wFrac * aspect), 3.4);
   camera.position.z = visH / (2*Math.tan(FOV*Math.PI/360));
   camera.aspect = aspect;
   camera.updateProjectionMatrix();
+
+  const idealVisH = Math.max(letterH * VH / (freeH * hFrac), letterW / (wFrac * aspect), 3.4);
+  formScale = visH / idealVisH;
 
   // put the form in the middle of the free band rather than the middle of the glass
   const centrePx = band.t + freeH/2;
@@ -2952,19 +2939,10 @@ function frame(now){
     wireThru.material.opacity = reveal * 0.42 * formFade;
     wireThru.visible = reveal > 0.01 && formFade > 0.02;
 
-    // the turn about the local up axis, with weight — wheel, drag or flick,
-    // unless a tap-triggered full turn is playing out, which takes over the
-    // wheel entirely until it lands
-    if(spinKick){
-      const k = Math.min(1, (performance.now() - spinKick.t0) / spinKick.dur);
-      const eased = easeOvershoot(k, 1.4);
-      spin = spinKick.from + Math.PI*2 * eased * spinKick.dir;
-      if(k >= 1){ spinKick = null; spinV = 0; }
-    } else {
-      spin += spinV;
-      spinV *= reduce ? 0.7 : 0.945;
-      if(Math.abs(spinV) < 0.00002) spinV = 0;
-    }
+    // the turn about the local up axis, with weight — wheel, drag or flick
+    spin += spinV;
+    spinV *= reduce ? 0.7 : 0.945;
+    if(Math.abs(spinV) < 0.00002) spinV = 0;
 
     // the tip from a vertical drag drifts back to level once the hand is off
     tilt += tiltV;
@@ -2983,7 +2961,7 @@ function frame(now){
     group.rotation.z = Math.sin(clock*0.41)*0.045;
     group.position.x = groupX;
     group.position.y = centreY + Math.sin(clock*1.15)*0.1;
-    group.scale.setScalar((0.9 + 0.1*ease) * (panelOpen && VW > 900 ? 0.86 : 1));
+    group.scale.setScalar(formScale * (0.9 + 0.1*ease) * (panelOpen && VW > 900 ? 0.86 : 1));
 
     stepMorph(dt);
     applyFade(ease);
