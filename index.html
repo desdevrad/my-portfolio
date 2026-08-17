@@ -2729,8 +2729,12 @@ function frame(now){
     uR2.value = 1.02 * radius * ease;
 
     // wireframe reveal: mouse hover only — a touch device has no hover, so
-    // coarse pointers never open the shell this way
-    const wantReveal = !coarse && !morph && !panelOpen && hoverForm;
+    // coarse pointers never open the shell this way. An open panel is no
+    // reason to withhold it: on a wide screen the form is still sitting there
+    // beside the archive, and pointing at it should do what it always does.
+    // On a narrow one the panel covers the form outright, and the hover test
+    // already refuses anything inside .panel, so there is nothing to guard.
+    const wantReveal = !coarse && !morph && hoverForm;
     reveal += ((wantReveal ? 1 : 0) - reveal) * (wantReveal ? 0.13 : 0.09);
     if(reveal < 0.002) reveal = 0;
     uReveal.value = reveal;
