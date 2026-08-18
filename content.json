@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-17T18:08:05.877Z",
+  "generated": "2026-08-18T15:17:21.514Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -141,6 +141,11 @@
       {
         "name": "WILLOW BEAUTY PRODUCTS",
         "scope": "CREATIVE DIRECTION",
+        "year": "2023"
+      },
+      {
+        "name": "SELF-INITIATED",
+        "scope": "3D DESIGN",
         "year": "2023"
       }
     ]
@@ -462,7 +467,8 @@
           "gallery": [
             "projects/02-posters/divar-hackathon2025/01.jpg",
             "projects/02-posters/divar-hackathon2025/02.jpg",
-            "projects/02-posters/divar-hackathon2025/03.jpg"
+            "projects/02-posters/divar-hackathon2025/03.jpg",
+            "projects/02-posters/divar-hackathon2025/04.jpg"
           ],
           "link": null,
           "tag": "EVENT IDENTITY / HACKATHON / 2025",
@@ -487,23 +493,28 @@
       "order": 2,
       "works": [
         {
-          "slug": "3d-threads",
-          "t": "D THREADS",
-          "c": "",
-          "y": "",
-          "r": "",
-          "img": "projects/03-3D/3d-threads/cover.jpg",
+          "slug": "threads",
+          "t": "3D THREADS LOGO",
+          "c": "Self-Initiated",
+          "y": "2023",
+          "r": "3D Artist & Designer",
+          "img": "projects/03-3D/threads/cover.jpg",
           "video": null,
           "gallery": [
-            "projects/03-3D/3d-threads/01.jpg"
+            "projects/03-3D/threads/01.jpg"
           ],
           "link": null,
-          "tag": null,
-          "lb": null,
-          "la": null,
-          "b": "",
-          "a": "",
-          "credit": null
+          "tag": "3D / EXPERIMENTAL / 2023",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "3D Threads Logo is a self-initiated exploration of the Threads logo through a three-dimensional approach. The project investigates how an existing digital brand mark can be reinterpreted as a physical-looking 3D object while incorporating elements of Instagram's visual language.",
+          "a": "I recreated and experimented with the Threads logo in Blender, transforming the flat mark into a three-dimensional form. The 3D treatment allowed me to explore Instagram's brand DNA through its visual language, materials, lighting, and color palette, creating a new interpretation of the logo beyond its original two-dimensional form.",
+          "credit": null,
+          "roles": [
+            "3D Design",
+            "Blender",
+            "Experimental Branding"
+          ]
         }
       ]
     },
