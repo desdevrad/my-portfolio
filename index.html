@@ -7,19 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-
-<!-- ── the library starts downloading with the page, not after it ────────
-     The module that needs three sits at the foot of the document, so the
-     browser only discovers the import once it has parsed everything above.
-     On a slow connection that is the whole stylesheet and body spent idle
-     before the first byte of the renderer is asked for. Named here, the four
-     files are fetched alongside the markup and are usually already warm by
-     the time the module runs. -->
-<link rel="preconnect" href="https://unpkg.com" crossorigin>
-<link rel="modulepreload" href="https://unpkg.com/three@0.160.0/build/three.module.js" crossorigin>
-<link rel="modulepreload" href="https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js" crossorigin>
-<link rel="modulepreload" href="https://unpkg.com/three@0.160.0/examples/jsm/utils/BufferGeometryUtils.js" crossorigin>
-<link rel="modulepreload" href="https://unpkg.com/three@0.160.0/examples/jsm/math/MeshSurfaceSampler.js" crossorigin>
 <style>
   :root{
     --void:#070708;
@@ -78,31 +65,9 @@
   }
   @media (pointer:fine){
     html,body,#gl,.hud,.hud a,.fx,.chip,.panel,.panel *,.lens,.lens *,button{cursor:none}
-
-    /* ── the pointer comes back for fullscreen video ────
-       The reticle that stands in for the cursor is an element of the page,
-       and a fullscreen <video> paints over the page entirely — so inside
-       fullscreen there was nothing to aim with at all: the custom cursor was
-       covered along with everything else, and the real one was suppressed by
-       the rule above. That left the browser's own control bar as the only way
-       back out and no way to point at it, so Esc was the only exit. While
-       anything is fullscreen the real cursor is handed back. Both the
-       standard and the -webkit- selector are written as separate rules, since
-       a browser that does not know one of them would drop the whole list. */
-    :fullscreen,:fullscreen *{cursor:auto}
-    :-webkit-full-screen,:-webkit-full-screen *{cursor:auto}
-    body.fs,body.fs *{cursor:auto}
   }
   #gl{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;
     display:block;z-index:0;touch-action:none}
-
-  /* ── the photographs are not for taking ───────────────
-     no drag ghost on the desktop, no long-press callout on iOS, no
-     selection handles. The contextmenu handler in the script closes the
-     right-click and long-press menus themselves. */
-  img{-webkit-user-select:none;user-select:none;-webkit-user-drag:none;
-    user-drag:none;-webkit-touch-callout:none}
-  .lens,.lens *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 
   /* ── screen treatment ─────────────────────────────── */
   .fx{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100dvh;
@@ -247,33 +212,11 @@
   .panel-title b{font-weight:500;font-size:12px;letter-spacing:.24em;color:var(--ice)}
   .panel-title i{font-style:normal;font-size:8px;letter-spacing:.22em;color:var(--dim)}
   .panel-nav{display:flex;align-items:center;gap:6px}
-  .pbtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;
-    height:30px;padding:0 10px;line-height:1;
-    font-family:'Azeret Mono',ui-monospace,monospace;font-size:9px;letter-spacing:.18em;
-    color:var(--mute);border:1px solid var(--hair);background:transparent;
+  .pbtn{font-family:'Azeret Mono',ui-monospace,monospace;font-size:9px;letter-spacing:.18em;
+    color:var(--mute);border:1px solid var(--hair);background:transparent;padding:8px 10px;
     transition:color .2s,background .2s,border-color .2s,opacity .3s}
   .pbtn:hover{color:var(--void);background:var(--ice);border-color:var(--ice)}
   .pbtn[hidden]{display:none}
-  /* icon-only buttons are square, so PREV and NEXT are the same box */
-  .pbtn.ibtn{width:30px;padding:0}
-
-  /* ── marks ────────────────────────────────────────────
-     One geometry, rotated. These used to be text — &larr;
-     &rarr; \2197 \2193 — but Azeret Mono's latin subset
-     carries only some of those codepoints, so the rest fell
-     through to whatever the device had. Each direction then
-     arrived at a different width and weight, which is why the
-     right arrow read bigger than the left one on a phone.
-     Drawn as SVG they are the same shape at every size,
-     independent of the font that happens to load. */
-  .ico{display:block;flex:0 0 auto;width:var(--ico,12px);height:var(--ico,12px);
-    fill:none;stroke:currentColor;stroke-width:2;
-    transform-origin:50% 50%}
-  .ico-r {transform:rotate(0deg)}     /* next     */
-  .ico-l {transform:rotate(180deg)}   /* previous */
-  .ico-u {transform:rotate(-90deg)}   /* up       */
-  .ico-d {transform:rotate(90deg)}    /* download */
-  .ico-ur{transform:rotate(-45deg)}   /* outbound */
   .panel-body{position:relative;flex:1;overflow:hidden}
   .view{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;
     padding:clamp(16px,2.4vw,26px);
@@ -299,16 +242,10 @@
 
   .page{display:flex;flex-direction:column;gap:22px}
   .page-hero{border:1px solid var(--hair);aspect-ratio:16/9;overflow:hidden}
-  /* Portrait and prose share one grid. A headline, if there is one, spans
-     both columns so it gets the full measure instead of breaking repeatedly
-     in a narrow one; under it the portrait sits beside the bio. On a phone
-     the whole thing collapses to a single column with the portrait leading. */
-  .who{display:grid;grid-template-columns:minmax(0,38%) minmax(0,1fr);
-    gap:0 clamp(16px,2.2vw,24px);align-items:start}
-  .who > h3{grid-column:1/-1;margin-bottom:clamp(14px,1.8vw,20px)}
-  .who .shot{position:relative;width:100%;border:1px solid var(--hair);
+  .who{display:flex;gap:18px;align-items:flex-start}
+  .who .shot{position:relative;flex:0 0 auto;width:168px;border:1px solid var(--hair);
     overflow:hidden;line-height:0}
-  .who .shot img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;
+  .who .shot img{width:100%;aspect-ratio:1;object-fit:cover;display:block;
     filter:grayscale(1) contrast(1.04);transition:filter .5s ease,opacity .5s ease}
   body.light .who .shot img{filter:grayscale(1) contrast(1.02) brightness(1.02)}
   .who .shot::after{content:"";position:absolute;inset:0;pointer-events:none;
@@ -318,7 +255,7 @@
     font-family:'Azeret Mono',ui-monospace,monospace;font-size:7px;letter-spacing:.22em;
     color:var(--ice);background:var(--sheet);border-top:1px solid var(--hair);
     padding:4px 6px;text-align:center;line-height:1.4}
-  .who .said{min-width:0}
+  .who .said{flex:1;min-width:0}
   .page-hero svg{width:100%;height:100%;display:block}
   .page h3{font-weight:700;font-size:clamp(19px,2.3vw,26px);letter-spacing:-.01em;
     line-height:1.15;color:var(--ice)}
@@ -334,17 +271,7 @@
     font-family:'Azeret Mono',ui-monospace,monospace;font-size:9.5px;letter-spacing:.14em;
     color:var(--ice);transition:color .2s,padding-left .25s}
   .rows a:hover{color:var(--dim);padding-left:8px}
-  .rows em{display:flex;align-items:center;justify-content:flex-end;gap:.85em;align-self:center;
-    font-style:normal;color:var(--dim);font-size:8.5px;letter-spacing:.2em;text-align:right}
-  .rows em .ico{--ico:11px}
-
-  /* skill tags — same chip as a project's tag row, so the two read as one
-     family. Each group is its own .block, matching DOCUMENTS / ELSEWHERE. */
-  .taglist{display:flex;flex-wrap:wrap;gap:6px}
-  .taglist span{font-family:'Azeret Mono',ui-monospace,monospace;font-size:8.5px;
-    letter-spacing:.16em;color:var(--mute);border:1px solid var(--hair);padding:6px 9px;
-    transition:border-color .25s,color .25s}
-  .taglist span:hover{border-color:var(--line);color:var(--ice)}
+  .rows em{font-style:normal;color:var(--dim);font-size:8.5px;letter-spacing:.2em;text-align:right}
   .lede{font-size:13.5px;line-height:1.6;color:var(--mute)}
   .mail{font-weight:700;font-size:clamp(17px,2.4vw,25px);letter-spacing:-.01em;
     color:var(--ice);text-decoration:none;word-break:break-all}
@@ -453,7 +380,7 @@
 
   /* ── lightbox ─────────────────────────────────────── */
   .lens{position:fixed;inset:0;z-index:12;display:flex;align-items:center;justify-content:center;
-    touch-action:none;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s}
+    touch-action:pan-y;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s}
   .lens.on{opacity:1;visibility:visible}
   .lens[hidden]{display:none}
   .lens-bg{position:absolute;inset:0;background:var(--lens);
@@ -466,10 +393,6 @@
     border:1px solid var(--hair);opacity:0;transform:scale(.93);
     transition:transform .44s cubic-bezier(.2,.8,.3,1),opacity .3s ease}
   .lens.on .lens-stage img{opacity:1;transform:none}
-  /* a pinch has to track the fingers exactly, so nothing is eased while they
-     are down — the easing comes back for the settle and the way home */
-  .lens.on .lens-stage.zoom img{transition:transform .3s cubic-bezier(.2,.8,.3,1),opacity .3s ease}
-  .lens.on .lens-stage.live img{transition:none}
   .lens.on .lens-stage img.swap{opacity:0;transform:scale(.985);
     transition-duration:.15s,.15s}
 
@@ -481,8 +404,7 @@
     transition:color .2s,background .2s,border-color .2s}
   .lens-btn:hover,.lens-btn:focus-visible{color:var(--void);background:var(--ice);border-color:var(--ice)}
   .lens-btn[hidden]{display:none}
-  .lens-btn .ico{--ico:16px}
-  .lens-x{top:clamp(14px,3vw,26px);right:clamp(14px,3vw,26px)}
+  .lens-x{top:clamp(14px,3vw,26px);right:clamp(14px,3vw,26px);font-size:18px}
   .lens-prev{left:clamp(10px,2.4vw,26px);top:50%;transform:translateY(-50%)}
   .lens-next{right:clamp(10px,2.4vw,26px);top:50%;transform:translateY(-50%)}
   .lens-count{position:absolute;z-index:2;left:50%;transform:translateX(-50%);
@@ -558,14 +480,12 @@
       transform:translateY(12px)}
     .explore.on .chip{transform:none}
     .chip.hot{transform:none}
-    .who{grid-template-columns:1fr;gap:16px}
-    .who > h3{margin-bottom:0}
-    .who .shot{order:-1;width:min(64%,210px)}
+    .who{flex-direction:column;gap:14px}
+    .who .shot{width:150px}
     .clients{grid-template-columns:repeat(2,1fr)}
 
-    /* the mark carries the meaning on its own here */
+    /* the glyph carries the meaning on its own here */
     #pclose .lbl{display:none}
-    #pclose{width:30px;padding:0}
     .gal{grid-template-columns:1fr 1fr;gap:8px}
 
     .lens-stage{padding:60px 14px 84px}
@@ -585,58 +505,6 @@
   @media (prefers-reduced-motion:reduce){
     .sweep,.sound.live .bars i{animation:none}
   }
-
-  /* ── quality tiers ──────────────────────────────────────────────────────
-     Everything below is switched on by the script, which watches the real
-     frame rate rather than guessing from the user agent. Two classes:
-
-       .lite  the screen treatment stops costing a full-page recomposite
-       .min   the last resort, for a machine still not keeping up
-
-     What goes first is not the design — it is the parts of the design that
-     are paid for on every single frame. A blur behind the panel has to be
-     recomputed each time the canvas under it changes, which on this page is
-     sixty times a second; a blend mode over a full-screen layer costs the
-     same way. Neither reads as a feature when it is gone, so long as the
-     plate underneath is opaque enough to keep the type legible — which is
-     what the variable overrides here are for. */
-
-  body.lite{
-    --plate:rgba(8,9,10,.88);
-    --sheet:rgba(9,10,11,.96);
-    --lens:rgba(4,4,5,.985);
-  }
-  body.lite.light{
-    --plate:rgba(255,255,255,.9);
-    --sheet:rgba(246,244,240,.98);
-    --lens:rgba(238,236,231,.99);
-  }
-
-  /* a blur of a live WebGL surface, re-read every frame, in eight places */
-  body.lite .hud .menu a,body.lite .hud .menu button,
-  body.lite .hud .tgl,body.lite .hud .sound,
-  body.lite .chip,body.lite .panel,body.lite .lens-bg,
-  body.lite .lens-btn,body.lite .play{
-    -webkit-backdrop-filter:none;backdrop-filter:none
-  }
-
-  /* the grain is a full-screen overlay blend — the single most expensive
-     layer on the page, and the one nobody can name once it is off */
-  body.lite .grain{display:none}
-  body.lite .sweep{display:none}
-  body.lite .scan{mix-blend-mode:normal;opacity:.2}
-  body.lite.light .scan{mix-blend-mode:normal;opacity:.16}
-  body.lite .who .shot::after,body.lite .detail-img::after{display:none}
-
-  /* grayscale on a photograph is a filter pass per paint; the hover swap
-     between filtered and unfiltered is the part that keeps re-running */
-  body.lite .card .thumb img{filter:none;transition:transform .45s cubic-bezier(.2,.8,.3,1)}
-  body.lite .who .shot img{filter:grayscale(1);transition:none}
-
-  body.min .scan{display:none}
-  body.min .vig{display:none}
-  body.min .card .thumb svg,body.min .card .thumb img{transition:none}
-  body.min .card:hover .thumb img,body.min .card:hover .thumb svg{transform:none}
 </style>
 </head>
 <body>
@@ -666,10 +534,10 @@
       <i id="panelsub">04 WORKS</i>
     </span>
     <div class="panel-nav">
-      <button class="pbtn ibtn" id="pprev" type="button" data-tag="PREV" hidden aria-label="Previous work"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.2 12h16.2"/><path d="M13.4 6l6 6-6 6"/></svg></button>
-      <button class="pbtn ibtn" id="pnext" type="button" data-tag="NEXT" hidden aria-label="Next work"><svg class="ico ico-r" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.2 12h16.2"/><path d="M13.4 6l6 6-6 6"/></svg></button>
+      <button class="pbtn" id="pprev" type="button" data-tag="PREV" hidden>&larr;</button>
+      <button class="pbtn" id="pnext" type="button" data-tag="NEXT" hidden>&rarr;</button>
       <button class="pbtn" id="pback" type="button" data-tag="BACK" hidden>INDEX</button>
-      <button class="pbtn" id="pclose" type="button" data-tag="CLOSE" aria-label="Close"><span class="lbl">CLOSE</span><svg class="ico ico-x" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14"/><path d="M19 5L5 19"/></svg></button>
+      <button class="pbtn" id="pclose" type="button" data-tag="CLOSE" aria-label="Close"><span class="lbl">CLOSE </span>&times;</button>
     </div>
   </div>
   <div class="panel-body">
@@ -687,9 +555,9 @@
 <div class="lens" id="lens" hidden role="dialog" aria-modal="true" aria-label="Project images">
   <div class="lens-bg" id="lensbg"></div>
   <figure class="lens-stage"><img id="lensimg" alt=""></figure>
-  <button class="lens-btn lens-x" id="lensclose" type="button" data-tag="CLOSE" aria-label="Close"><svg class="ico ico-x" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5l14 14"/><path d="M19 5L5 19"/></svg></button>
-  <button class="lens-btn lens-prev" id="lensprev" type="button" data-tag="PREV" aria-label="Previous image"><svg class="ico ico-l" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.2 12h16.2"/><path d="M13.4 6l6 6-6 6"/></svg></button>
-  <button class="lens-btn lens-next" id="lensnext" type="button" data-tag="NEXT" aria-label="Next image"><svg class="ico ico-r" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.2 12h16.2"/><path d="M13.4 6l6 6-6 6"/></svg></button>
+  <button class="lens-btn lens-x" id="lensclose" type="button" data-tag="CLOSE" aria-label="Close">&times;</button>
+  <button class="lens-btn lens-prev" id="lensprev" type="button" data-tag="PREV" aria-label="Previous image">&larr;</button>
+  <button class="lens-btn lens-next" id="lensnext" type="button" data-tag="NEXT" aria-label="Next image">&rarr;</button>
   <div class="lens-count" id="lenscount"><b id="lensnow">01</b><i>/</i><span id="lenstotal">01</span></div>
 </div>
 
@@ -753,58 +621,13 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
 
-/* ══ model ════════════════════════════════════════════════════════════════
-   model/logo.glb is the form that is standing every time the page loads —
-   that filename is fixed, so the first thing a visitor sees never changes.
-   Every other .glb dropped into model/ becomes something the form can turn
-   into. tools/build-content.mjs scans the folder and lists them under
-   "models" in content.json, so nothing here has to know how many there are:
-   add a file, push, and the next tap can land on it. See model/README.md. */
-const MODEL_DIR   = 'model/';
-const MODEL_FIRST = 'logo.glb';       // the one on load — keep this name
-const MODEL_URL   = MODEL_DIR + MODEL_FIRST;
-const MAX_ALTS    = 12;               // how many extra forms are held in memory
+/* ══ model ════════════════════════════════════════════════════════════════ */
+const MODEL_URL = 'model/logo.glb';   // swap this file to try a different model — see model/README.md
 const FIT = 3.0;                      // on-screen height of the form, world units
 const BACK_Z = -6;
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarse = matchMedia('(pointer: coarse)').matches;
-
-/* ══ quality ══════════════════════════════════════════════════════════════
-   Three settings, and the page decides between them by watching itself.
-
-     2  everything, as designed
-     1  the costs that are paid every frame come off — the buffer is smaller,
-        the glass stops refracting, the screen treatment stops recompositing
-     0  the last resort: half the pixels, half the frame rate, a third of the
-        field, no reverb
-
-   The starting guess comes from what the device is willing to admit about
-   itself, which is not much and is often wrong in both directions. It only
-   decides where to begin. From there the frame loop keeps score and moves
-   the tier, so a machine nobody anticipated still lands somewhere sensible.
-   A tier that has proved too slow is never climbed back to. */
-const MEM   = navigator.deviceMemory || 0;
-const CORES = navigator.hardwareConcurrency || 0;
-
-let tier = 2;
-if(MEM && MEM <= 4) tier = 1;
-if((MEM && MEM <= 2) || (CORES && CORES <= 2)) tier = 0;
-if(reduce && tier > 1) tier = 1;
-const startTier = tier;
-
-const dprFor = t => t >= 2 ? Math.min(devicePixelRatio, coarse ? 1.75 : 2)
-                 : t === 1 ? Math.min(devicePixelRatio, 1.3)
-                           : Math.min(devicePixelRatio, 1);
-
-/* Every eased value in the frame loop was written as a fraction per frame,
-   which silently means "per sixtieth of a second". On a machine running at
-   thirty the intro takes twice as long, the form drifts at half speed and
-   the whole place feels like it is wading — slowness on top of slowness.
-   This converts a per-frame rate into the equivalent for the frame that
-   actually elapsed, so the motion reads the same at any frame rate and only
-   the smoothness differs. */
-const damp = (rate, dt) => 1 - Math.pow(1 - rate, dt * 60);
 
 /* ══ themes ═══════════════════════════════════════════════════════════════ */
 const THEMES = {
@@ -840,20 +663,9 @@ const TH = ()=>THEMES[mode];
 
 /* ══ renderer ═════════════════════════════════════════════════════════════ */
 const canvas = document.getElementById('gl');
-
-/* Multisampling costs in proportion to the buffer, and the buffer on a phone
-   is already dense enough that the edges it would smooth are under a pixel
-   wide. Kept for the desktop, where the buffer is coarser and the difference
-   shows; dropped where the screen is doing the same job for free.
-   No alpha and no stencil: neither is used, and both are memory and
-   bandwidth per frame on a tiled mobile GPU. */
-const wantAA = tier >= 2 && !(coarse && devicePixelRatio >= 2);
-const renderer = new THREE.WebGLRenderer({
-  canvas, antialias:wantAA, alpha:false, stencil:false,
-  powerPreference:'high-performance'
-});
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
 // a phone gains nothing from a 3x buffer, and loses a third of its frame rate to it
-let DPR = dprFor(tier);
+const DPR = Math.min(devicePixelRatio, coarse ? 1.75 : 2);
 renderer.setPixelRatio(DPR);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = TH().exposure;
@@ -914,39 +726,24 @@ scene.add(poster);
 
 let grainPattern = null;
 function makeGrain(){
-  // 128 rather than 180 is a little over half the pixels to fill, and the
-  // tile is still shown at 180 by the stylesheet — noise has no scale to be
-  // wrong about. The array is read once into a local, since img.data on the
-  // loop condition is a property lookup per pixel.
-  const S = 128;
-  const n = document.createElement('canvas'); n.width = n.height = S;
+  const n = document.createElement('canvas'); n.width = n.height = 180;
   const g = n.getContext('2d');
-  const img = g.createImageData(S,S), d = img.data;
-  for(let i=0;i<d.length;i+=4){
-    d[i] = d[i+1] = d[i+2] = 90 + Math.random()*130;
-    d[i+3] = Math.random()*46;
+  const img = g.createImageData(180,180);
+  for(let i=0;i<img.data.length;i+=4){
+    const v = 90 + Math.random()*130;
+    img.data[i] = img.data[i+1] = img.data[i+2] = v;
+    img.data[i+3] = Math.random()*46;
   }
   g.putImageData(img,0,0);
+  document.getElementById('grain').style.backgroundImage = 'url('+n.toDataURL()+')';
   grainPattern = n;
-  // toDataURL is a PNG encode on the main thread, and the only thing waiting
-  // on it is a decorative layer that .lite hides outright. It can be late.
-  if(tier > 1) setTimeout(()=>{
-    try{ document.getElementById('grain').style.backgroundImage = 'url('+n.toDataURL()+')'; }catch(e){}
-  }, 400);
 }
 makeGrain();
 
 function drawPoster(w, h, dpr){
   const P = TH().poster;
-  /* The backdrop is a soft gradient, a grid of hairlines and some noise.
-     There is nothing in it that a three-times buffer would carry, and at
-     three times on a tall phone it is a twelve-megapixel canvas to fill and
-     upload as a texture — on every resize, and the address bar sliding away
-     counts as a resize. Capped, it is a fraction of the work and reads the
-     same. */
-  const k = Math.max(0.5, Math.min(dpr, tier >= 2 ? 1.5 : 1, 2400/Math.max(w,h)));
-  posterCanvas.width = Math.round(w*k); posterCanvas.height = Math.round(h*k);
-  pctx.setTransform(k,0,0,k,0,0);
+  posterCanvas.width = Math.round(w*dpr); posterCanvas.height = Math.round(h*dpr);
+  pctx.setTransform(dpr,0,0,dpr,0,0);
   pctx.clearRect(0,0,w,h);
   pctx.fillStyle = P.bg; pctx.fillRect(0,0,w,h);
 
@@ -992,31 +789,22 @@ const uPC = { value: new THREE.Vector3(0,0,-99) };
 const uPR = { value: 0 };
 const uPI = { value: 0 };
 const uKeyC = { value: new THREE.Color(TH().key) };
-// how far the shell has opened into a wireframe — driven by mouse hover only,
-// since a touch device has no hover to give it
-const uReveal = { value: 0 };
 
 function zoneify(mat, mode2){
   mat.transparent = true;
   mat.onBeforeCompile = (sh)=>{
     sh.uniforms.uC = uC; sh.uniforms.uR1 = uR1; sh.uniforms.uR2 = uR2;
     sh.uniforms.uPC = uPC; sh.uniforms.uPR = uPR; sh.uniforms.uPI = uPI;
-    sh.uniforms.uKeyC = uKeyC; sh.uniforms.uReveal = uReveal;
+    sh.uniforms.uKeyC = uKeyC;
     sh.vertexShader = 'varying vec3 vWP;\nvarying vec3 vOP;\n' + sh.vertexShader.replace(
       '#include <project_vertex>',
       '#include <project_vertex>\n  vWP = (modelMatrix * vec4(transformed, 1.0)).xyz;\n  vOP = transformed;'
     );
-    // hovering (mouse only) does not just brighten the lens — it thins the
-    // shell everywhere and brings the wireframe up over the whole form, so
-    // what you get is the structure of the thing rather than a lit patch
-    // hover takes the solid all the way off rather than part way: the matte
-    // and the glass shell both go to nothing at full reveal, and the wireframe
-    // comes up to full, so what's left under the pointer is only the structure
     const band = mode2 === 'in'
-      ? 'a = (1.0 - smoothstep(uR1 - 0.13, uR1 + 0.13, d)) * (1.0 - uReveal);'
+      ? 'a = 1.0 - smoothstep(uR1 - 0.13, uR1 + 0.13, d);'
       : mode2 === 'out'
-        ? 'a = smoothstep(uR1 - 0.13, uR1 + 0.13, d) * (1.0 - uReveal);'
-        : 'a = max(smoothstep(uR1 - 0.16, uR1 + 0.10, d) * (1.0 - smoothstep(uR2 - 0.16, uR2 + 0.16, d)), uReveal);';
+        ? 'a = smoothstep(uR1 - 0.13, uR1 + 0.13, d);'
+        : 'a = smoothstep(uR1 - 0.16, uR1 + 0.10, d) * (1.0 - smoothstep(uR2 - 0.16, uR2 + 0.16, d));';
     const wave =
       '\n  float pd = distance(vOP, uPC);' +
       '\n  float ring = exp(-pow((pd - uPR) / 0.21, 2.0)) * uPI;' +
@@ -1025,7 +813,7 @@ function zoneify(mat, mode2){
       '\n  diffuseColor.rgb = mix(diffuseColor.rgb, uKeyC, clamp(ring * 1.25, 0.0, 1.0));';
     sh.fragmentShader =
       'varying vec3 vWP;\nvarying vec3 vOP;\nuniform vec3 uC;\nuniform float uR1;\nuniform float uR2;\n' +
-      'uniform vec3 uPC;\nuniform float uPR;\nuniform float uPI;\nuniform vec3 uKeyC;\nuniform float uReveal;\n' + sh.fragmentShader.replace(
+      'uniform vec3 uPC;\nuniform float uPR;\nuniform float uPI;\nuniform vec3 uKeyC;\n' + sh.fragmentShader.replace(
       '#include <color_fragment>',
       '#include <color_fragment>' +
       // the lens is a circle on the glass, not a ball in the world. Measuring
@@ -1077,30 +865,12 @@ function buildField(){
       });
     }
   }
-  /* The grid is walked column by column, so the array comes out sorted left
-     to right. A lower tier draws fewer instances by lowering the mesh's
-     count, which takes them off the end — and off the end of a sorted list
-     is the right-hand side of the screen. Shuffled once here, any prefix is
-     an even thinning of the whole field instead of a bite out of one edge.
-     Seeded, so it is the same field every load. */
-  for(let i=blocks.length-1;i>0;i--){
-    const j = (rng()*(i+1))|0;
-    const t = blocks[i]; blocks[i] = blocks[j]; blocks[j] = t;
-  }
   field = new THREE.InstancedMesh(
     new THREE.CircleGeometry(0.5, 10),
     new THREE.MeshBasicMaterial({ transparent:true, opacity:TH().fieldOp, depthWrite:false }),
     blocks.length
   );
   field.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  /* A lower tier draws only the first n instances, and the rest are never
-     given a matrix — which in an unwritten buffer is the identity, i.e. a
-     unit circle sitting at the origin. Harmless while they are not drawn,
-     but the tier can go back up, and the frame where the count rises would
-     put a handful of full-size discs through the middle of the form. Zeroed
-     here, there is nothing to see until updateField places them. */
-  dummy.position.set(0,0,0); dummy.scale.set(0,0,0); dummy.updateMatrix();
-  for(let i=0;i<blocks.length;i++) field.setMatrixAt(i, dummy.matrix);
   const c = new THREE.Color(TH().field);
   blocks.forEach((b,i)=>field.setColorAt(i, c));
   field.instanceColor.needsUpdate = true;
@@ -1111,18 +881,13 @@ buildField();
 const tmp = new THREE.Vector3();
 function updateField(ease, t, waveC, waveR, waveI){
   const size = CELL * DOT;
-  // only the instances that will actually be drawn — a lower tier lowers
-  // field.count, and there is no sense stepping past it
-  const n = field.count;
-  // these are read once per dot otherwise, three property hops deep
-  const c = uC.value, r1 = uR1.value, r2 = uR2.value;
-  for(let i=0;i<n;i++){
+  for(let i=0;i<blocks.length;i++){
     const b = blocks[i];
     tmp.set(b.x, b.y, b.z);
-    const d = tmp.distanceTo(c);
+    const d = tmp.distanceTo(uC.value);
 
-    let s = 0.22 + 0.78 * THREE.MathUtils.smoothstep(d, r1 - 0.25, r1 + 0.45);
-    const ring = Math.max(0, 1 - Math.abs(d - r2)/0.75);
+    let s = 0.22 + 0.78 * THREE.MathUtils.smoothstep(d, uR1.value - 0.25, uR1.value + 0.45);
+    const ring = Math.max(0, 1 - Math.abs(d - uR2.value)/0.75);
     s *= 1 + 0.34*ring;
     if(!reduce){
       s *= 0.94 + 0.06*Math.sin(t*b.speed + b.phase);
@@ -1155,11 +920,7 @@ function normalize(geo){
   geo.scale(k,k,k);
   geo.computeBoundingBox(); geo.computeBoundingSphere();
   const fitted = geo.boundingBox.getSize(new THREE.Vector3());
-  // every form is fitted to the same box, so the framing carries over and a
-  // morph never jumps in scale. The dims ride on the geometry rather than in
-  // a global, since forms are now normalized long before they are shown.
-  geo.userData.fitW = fitted.x;
-  geo.userData.fitH = fitted.y;
+  letterW = fitted.x; letterH = fitted.y;
   return geo;
 }
 
@@ -1179,12 +940,11 @@ function flatten(root){
   return parts.length === 1 ? parts[0] : BufferGeometryUtils.mergeGeometries(parts, false);
 }
 
-let matte, glass, outline, wire, wireThru, ready = false;
+let matte, glass, outline, wire, ready = false;
 
 function build(geo){
   normalize(geo);
   letterGeo = geo;
-  letterW = geo.userData.fitW; letterH = geo.userData.fitH;
   const T = TH();
 
   matte = new THREE.Mesh(geo, zoneify(new THREE.MeshStandardMaterial({
@@ -1200,26 +960,12 @@ function build(geo){
   outline.renderOrder = 2;
   group.add(outline);
 
-  const wireGeo = new THREE.WireframeGeometry(geo);
-  wire = new THREE.LineSegments(wireGeo, zoneify(new THREE.LineBasicMaterial({
+  wire = new THREE.LineSegments(new THREE.WireframeGeometry(geo), zoneify(new THREE.LineBasicMaterial({
     color:T.line, depthWrite:false
   }), 'band'));
   wire.scale.setScalar(1.006);
   wire.renderOrder = 3;
   group.add(wire);
-
-  // the same lines a second time, with no depth test, carried entirely by the
-  // hover reveal. The matte goes to zero alpha on hover but still writes depth,
-  // which would leave the far side of the mesh masked by a shell you can no
-  // longer see — this pass puts the hidden lines back. Riding the reveal means
-  // it fades up with the shell rather than snapping in, and at rest it is off.
-  wireThru = new THREE.LineSegments(wireGeo, new THREE.LineBasicMaterial({
-    color:T.line, transparent:true, opacity:0, depthTest:false, depthWrite:false
-  }));
-  wireThru.scale.setScalar(1.006);
-  wireThru.renderOrder = 3.5;
-  wireThru.visible = false;
-  group.add(wireThru);
 
   const depth = geo.boundingBox.getSize(new THREE.Vector3()).z;
   glass = new THREE.Mesh(geo, zoneify(new THREE.MeshPhysicalMaterial({
@@ -1235,18 +981,11 @@ function build(geo){
   glass.scale.setScalar(1.004);
   glass.renderOrder = 4;
   group.add(glass);
-  tuneGlass();
 
   ready = true;
-  // slot zero of the bench is whatever loaded first, and it already owns the
-  // edge and wireframe passes — no need to cut them a second time
-  forms[0] = { url:MODEL_URL, geo, edges:outline.geometry, wireGeo:wire.geometry };
-  formIx = 0;
   try{ resize(); }catch(e){}     // refit now that the real proportions are known
   // the grains are only needed on the first tap, so they can wait a couple of frames
   setTimeout(()=>{ try{ buildDust(); }catch(e){} }, 90);
-  // the rest of the folder loads behind the intro, so the first paint is unaffected
-  setTimeout(loadBench, 1200);
 }
 
 const boot = document.getElementById('boot');
@@ -1267,101 +1006,6 @@ new GLTFLoader().load(
   }
 );
 
-/* ══ the bench: every form the letter can become ══════════════════════════
-   Slot zero is model/logo.glb and is what stands on load. The others arrive
-   afterwards, one at a time and only once the first form is up, so a folder
-   with a dozen models still costs the visitor nothing at first paint. The
-   count is never hard-coded anywhere — the list comes from content.json.
-
-   Each slot carries its geometry plus the two derived passes a swap needs
-   (edges, wireframe). Cutting those on load rather than mid-flight is the
-   difference between a morph that lands clean and one that hitches on the
-   frame it hands over. */
-
-const forms = [];                 // { url, geo, edges, wireGeo }
-let formIx = 0;                   // which one is standing right now
-let nextIx = -1;                  // which one the next tap will bring in
-let benchList = null, benchLoading = false;
-
-const idle = fn => (window.requestIdleCallback
-  ? requestIdleCallback(()=>fn(), { timeout:1500 })
-  : setTimeout(fn, 60));
-
-/* content.json is the source of truth; model/models.json is a hand-written
-   fallback for anyone serving the folder without running the build script. */
-function setBench(list){
-  benchList = (list || [])
-    .filter(n => typeof n === 'string' && /\.(glb|gltf)$/i.test(n))
-    .map(n => n.indexOf('/') >= 0 ? n : MODEL_DIR + n)
-    .filter(u => u !== MODEL_URL);
-  loadBench();
-}
-
-function loadBench(){
-  if(benchLoading || !benchList || !benchList.length || !ready) return;
-  benchLoading = true;
-  const queue = benchList.slice(0, MAX_ALTS);
-  const loader = new GLTFLoader();
-
-  (function next(){
-    const url = queue.shift();
-    if(!url){ benchLoading = false; return; }
-    loader.load(url, gltf=>{
-      try{
-        const geo = flatten(gltf.scene);
-        if(geo){
-          normalize(geo);
-          const f = { url, geo, edges:null, wireGeo:null };
-          forms.push(f);
-          // the two heavy derivations, spread over separate idle slices
-          idle(()=>{
-            f.edges = new THREE.EdgesGeometry(geo, 20);
-            idle(()=>{ f.wireGeo = new THREE.WireframeGeometry(geo); });
-          });
-          if(nextIx < 0) chooseNext();       // the first arrival unlocks morphing
-        }
-      }catch(err){ console.warn('[model]', url, err); }
-      idle(next);
-    }, undefined, ()=>{
-      console.warn('[model] could not load ' + url);
-      idle(next);
-    });
-  })();
-}
-
-/* The next destination is drawn as soon as the current one lands, not at the
-   moment of the tap — which leaves a whole idle window to sample its cloud
-   and pair the grains, so the tap itself is free. The current form is left
-   out of the draw, so nothing ever morphs into what it already is. */
-function chooseNext(){
-  const pool = [];
-  for(let i=0;i<forms.length;i++) if(i !== formIx && forms[i] && forms[i].geo) pool.push(i);
-  nextIx = pool.length ? pool[(Math.random()*pool.length)|0] : -1;
-  if(nextIx >= 0) idle(()=>{ if(dustReady) pairFor(cid(formIx,0), cid(nextIx,0)); });
-}
-
-// handed over halfway through the flight, while the solid is fully faded out
-function swapForm(i){
-  const f = forms[i];
-  if(!f || !f.geo || !ready) return;
-  formIx = i;
-  letterGeo = f.geo;
-  letterW = f.geo.userData.fitW || letterW;
-  letterH = f.geo.userData.fitH || letterH;
-
-  matte.geometry = f.geo;
-  glass.geometry = f.geo;
-  glass.material.thickness = Math.max(f.geo.boundingBox.getSize(new THREE.Vector3()).z, 0.6);
-
-  if(!f.edges)   f.edges   = new THREE.EdgesGeometry(f.geo, 20);
-  if(!f.wireGeo) f.wireGeo = new THREE.WireframeGeometry(f.geo);
-  outline.geometry  = f.edges;
-  wire.geometry     = f.wireGeo;
-  wireThru.geometry = f.wireGeo;
-
-  try{ resize(); }catch(e){}     // proportions differ between forms
-}
-
 
 /* ══ dust: the letter comes apart and puts itself back together ═══════════
    The form is sampled twice into two clouds of equal size. A kd-tree walks
@@ -1374,48 +1018,13 @@ function swapForm(i){
    Grain count is the one per-frame cost this adds, so it is kept lean and
    cut further on phones and when motion is asked to be reduced. */
 
-/* The buffers are cut once, at this size, and cannot be resized later — so
-   this reads the tier the device started on rather than wherever it settles.
-   Being wrong here is cheap: the grains are only on screen during a morph. */
-const PN = tier === 0 ? 2400
-         : tier === 1 ? 4200
-         : reduce ? 3200 : (coarse ? 5200 : 9000);
+const PN = reduce ? 3200 : (coarse ? 5200 : 9000);
 const MORPH_T = reduce ? 0.85 : 1.35;
 
 let letterGeo = null, formFade = 1;
+let cloudA = null, cloudB = null, pairAB = null;
 let dust = null, dustMat = null, dustReady = false;
 let morph = null, queued = 0;
-
-/* A cloud belongs to a form, not to the morph, so it is cut once and kept.
-   `variant` exists only for the case of a single model in the folder, where
-   the departure and arrival clouds have to be two different samplings of the
-   same surface or every grain would already be home. */
-const clouds = new Map();     // "form#variant" -> { pos, nrm }
-const pairs  = new Map();     // "from>to"      -> permutation
-const cid = (i, v) => i + '#' + v;
-
-function cloudById(id){
-  let c = clouds.get(id);
-  if(c) return c;
-  const parts = id.split('#'), i = +parts[0], v = +parts[1];
-  const f = forms[i];
-  if(!f || !f.geo) return null;
-  c = sampleCloud(f.geo, 9001 + i*7919 + v*4703);
-  clouds.set(id, c);
-  return c;
-}
-
-function pairFor(idA, idB){
-  const k = idA + '>' + idB;
-  let p = pairs.get(k);
-  if(p) return p;
-  const A = cloudById(idA), B = cloudById(idB);
-  if(!A || !B) return null;
-  p = kdPair(A.pos, B.pos);
-  if(pairs.size > 40) pairs.clear();      // n forms have n² routes between them
-  pairs.set(k, p);
-  return p;
-}
 
 function sstep(x){
   x = Math.min(1, Math.max(0, x));
@@ -1572,14 +1181,11 @@ function buildDust(){
   dust.visible = false;
   group.add(dust);
 
-  // sampling and pairing are chunked so the frames right after boot stay smooth.
-  // What is warmed here is the standing form's own departure cloud plus the
-  // self-morph fallback, which is all that can be needed before the rest of
-  // the folder has arrived; cross-form pairs are warmed by chooseNext().
+  // sampling and pairing are chunked so the frames right after boot stay smooth
   const jobs = [
-    ()=>{ cloudById(cid(formIx,0)); },
-    ()=>{ cloudById(cid(formIx,1)); },
-    ()=>{ pairFor(cid(formIx,0), cid(formIx,1)); },
+    ()=>{ cloudA = sampleCloud(letterGeo, 9001); },
+    ()=>{ cloudB = sampleCloud(letterGeo, 4703); },
+    ()=>{ pairAB = kdPair(cloudA.pos, cloudB.pos); },
     ()=>{
       dustReady = true;
       sizeDust(); syncDust();
@@ -1605,18 +1211,14 @@ function sizeDust(){
   if(dustMat) dustMat.uniforms.uPx.value = VH * DPR / (2*Math.tan(FOV*Math.PI/360));
 }
 
-function armDust(hit, idA, idB){
-  if(!dust) return false;
-  const A = cloudById(idA), B = cloudById(idB);
-  if(!A || !B) return false;
-  const perm = pairFor(idA, idB);
-  if(!perm) return false;
+function armDust(hit){
+  if(!dust || !cloudA || !cloudB || !pairAB) return false;
   const g = dust.geometry;
   const p = g.attributes.position.array, t = g.attributes.aTo.array, n = g.attributes.aNrm.array;
-  p.set(A.pos); n.set(A.nrm);
+  p.set(cloudA.pos); n.set(cloudA.nrm);
   for(let i=0;i<PN;i++){
-    const j = perm[i]*3, o = i*3;
-    t[o] = B.pos[j]; t[o+1] = B.pos[j+1]; t[o+2] = B.pos[j+2];
+    const j = pairAB[i]*3, o = i*3;
+    t[o] = cloudB.pos[j]; t[o+1] = cloudB.pos[j+1]; t[o+2] = cloudB.pos[j+2];
   }
   g.attributes.position.needsUpdate = true;
   g.attributes.aTo.needsUpdate = true;
@@ -1631,19 +1233,13 @@ function startMorph(hit){
   if(!ready) return;
   if(morph){ queued = 1; return; }              // a tap mid-flight still counts
   if(!dustReady){ queued = 1; return; }         // the grains are still being cut
+  if(!armDust(hit)) return;
 
-  // where it is going was decided when the last morph landed. With only one
-  // model in the folder there is nowhere to go, and the form comes apart and
-  // puts itself back together as before — the folder can grow later.
-  const to = (nextIx >= 0 && forms[nextIx] && forms[nextIx].geo) ? nextIx : -1;
-  const idA = cid(formIx, 0);
-  const idB = to >= 0 ? cid(to, 0) : cid(formIx, 1);
-  if(!armDust(hit, idA, idB)) return;
-
-  morph = { t:0, sealed:false, swapped:false, to };
+  morph = { t:0, sealed:false };
   dustMat.uniforms.uSwirl.value *= -1;          // the twist alternates, so no two are alike
   dust.visible = true;
   formFade = 1;
+  spinV += (reduce ? 0.006 : 0.019);            // a nudge, so the turn carries through
   morphSound();
 }
 
@@ -1658,14 +1254,6 @@ function stepMorph(dt){
   // the solid lets go early and is back before the grains have finished settling
   formFade = Math.max(1 - sstep(k/0.17), sstep((k - 0.78)/0.22));
 
-  // the handover happens in the gap where the solid is fully out — from 0.17
-  // to 0.78 there is nothing on screen but grains, so the geometry underneath
-  // can be exchanged without anything being seen to change
-  if(!morph.swapped && k > 0.45){
-    morph.swapped = true;
-    if(morph.to >= 0) swapForm(morph.to);
-  }
-
   if(!morph.sealed && k > 0.83){                // a ring closes over the letter again
     morph.sealed = true;
     spawnRing(new THREE.Vector3(0,0,0.34), new THREE.Vector3(0,0,1), 0);
@@ -1675,40 +1263,8 @@ function stepMorph(dt){
     morph = null;
     dust.visible = false;
     formFade = 1;
-    chooseNext();                               // and the next draw begins warming
     if(queued){ queued = 0; startMorph(null); }
   }
-}
-
-/* ── what the shell costs ─────────────────────────────────────────────────
-   transmission is not a shading trick — it makes the renderer draw the whole
-   scene a second time, into a buffer the shell then reads through. Every
-   frame, whether or not the lens is open over it. Together with the
-   clearcoat and the iridescence it is comfortably the most expensive thing
-   on the page, and it is spent on a circle a few hundred pixels wide.
-
-   Off the top tier the refraction goes and a sheen stays: same shape, same
-   place in the composition, one render pass instead of two. On the bottom
-   tier the shell is not drawn at all. */
-let glassOK = true, glassBase = 1;
-function tuneGlass(){
-  if(!glass) return;
-  const full = tier >= 2;
-  const m = glass.material;
-  glassOK = tier > 0;
-  if(!glassOK) glass.visible = false;
-  // with transmission on, what is seen through the shell is the scene behind
-  // it and the alpha carries the shape. With it off, alpha is all there is —
-  // left at one the lens circle would fill with flat white and cover the very
-  // structure it exists to open onto, so the shell is held back to a sheen.
-  glassBase = full ? 1 : 0.34;
-  if((m.transmission > 0) === full) return;    // already in the right state
-  m.transmission     = full ? 1 : 0;
-  m.clearcoat        = full ? 1 : 0;
-  m.iridescence      = full ? 0.3 : 0;
-  m.roughness        = full ? 0.02 : 0.14;
-  m.envMapIntensity  = full ? 0.35 : 0.55;
-  m.needsUpdate = true;                        // the defines change with them
 }
 
 // one place decides how solid the form looks, so the morph and the intro agree
@@ -1721,13 +1277,12 @@ function applyFade(ease){
   outline.material.opacity = T.lineOp * ease * v;
   wire.visible = v > 0.02;
   outline.visible = v > 0.02;
-  glass.visible = glassOK && v > 0.9;          // transmission doesn't fade cleanly
-  glass.material.opacity = v * glassBase;
+  glass.visible = v > 0.9;                     // transmission doesn't fade cleanly
+  glass.material.opacity = v;
   const s = 0.986 + 0.014*v;                   // the solid contracts a hair as it lets go
   matte.scale.setScalar(s);
   outline.scale.setScalar(1.002*s);
   wire.scale.setScalar(1.006*s);
-  wireThru.scale.setScalar(1.006*s);
   glass.scale.setScalar(1.004*s);
 }
 
@@ -1771,15 +1326,8 @@ function scheduleChord(first){
   const ac = ctx(), t = ac.currentTime;
   const notes = CHORDS[chordIx++ % CHORDS.length];
   const dur = 17, fade = first ? 1.6 : 4.0, out = 5.0;
-  /* Two voices a note, each with its own filter and its own modulator, is
-     twenty-four nodes running at once and another twenty-four overlapping
-     them at every change — for a bed that sits under everything and is meant
-     not to be listened to. One voice a note off the top tier, and the slow
-     filter sweep goes with the second: the chord still moves, it just moves
-     as a whole rather than each partial drifting against the others. */
-  const voices = tier >= 2 ? 2 : 1;
   notes.forEach((f, i)=>{
-    for(let u=0; u<voices; u++){
+    for(let u=0; u<2; u++){
       const o = ac.createOscillator();
       o.type = u ? 'triangle' : 'sawtooth';
       o.frequency.value = f * (1 + (Math.random()-0.5)*0.005);
@@ -1788,13 +1336,10 @@ function scheduleChord(first){
       lp.type = 'lowpass'; lp.Q.value = 0.7;
       lp.frequency.value = 300 + i*110;
 
-      let lfo = null;
-      if(tier >= 2){
-        lfo = ac.createOscillator();
-        lfo.frequency.value = 0.03 + Math.random()*0.05;
-        const lfoG = ac.createGain(); lfoG.gain.value = 130;
-        lfo.connect(lfoG); lfoG.connect(lp.frequency);
-      }
+      const lfo = ac.createOscillator();
+      lfo.frequency.value = 0.03 + Math.random()*0.05;
+      const lfoG = ac.createGain(); lfoG.gain.value = 130;
+      lfo.connect(lfoG); lfoG.connect(lp.frequency);
 
       const g = ac.createGain();
       const peak = (u ? 0.05 : 0.08) / (1 + i*0.4);
@@ -1805,8 +1350,8 @@ function scheduleChord(first){
 
       o.connect(lp); lp.connect(g);
       g.connect(ambientBus); g.connect(verb);
-      o.start(t); o.stop(t + dur + 1);
-      if(lfo){ lfo.start(t); lfo.stop(t + dur + 1); }
+      o.start(t); lfo.start(t);
+      o.stop(t + dur + 1); lfo.stop(t + dur + 1);
     }
   });
 }
@@ -1844,18 +1389,7 @@ function buildAudio(){
     master = ac.createGain(); master.gain.value = 0.0001;
     master.connect(ac.destination);
 
-    /* A convolver folding a multi-second impulse over everything that is
-       sounding, continuously, is not a one-off cost — it is a thread of work
-       running for as long as the page is open, and on a slow machine it
-       competes with the frame loop for exactly the same core. The tail is
-       shortened off the top tier and dropped entirely at the bottom, where a
-       plain gain takes its place: every send stays wired, they just land on a
-       quiet bus instead of a room. */
-    if(tier > 0){
-      verb = ac.createConvolver(); verb.buffer = makeIR(tier >= 2 ? 3.6 : 2.0, 2.6);
-    }else{
-      verb = ac.createGain(); verb.gain.value = 0.2;
-    }
+    verb = ac.createConvolver(); verb.buffer = makeIR(4.5, 2.6);
     const verbGain = ac.createGain(); verbGain.gain.value = 0.9;
     verb.connect(verbGain); verbGain.connect(master);
 
@@ -1872,9 +1406,7 @@ function buildAudio(){
       o.start(); lfo.start();
     });
 
-    // it loops, so the only thing the length buys is a longer period before
-    // the repeat becomes audible — which for filtered noise is never
-    const nb = ac.createBuffer(1, ac.sampleRate*2, ac.sampleRate);
+    const nb = ac.createBuffer(1, ac.sampleRate*4, ac.sampleRate);
     const nd = nb.getChannelData(0);
     for(let i=0;i<nd.length;i++) nd[i] = (Math.random()*2-1)*0.5;
     const src = ac.createBufferSource(); src.buffer = nb; src.loop = true;
@@ -2317,9 +1849,6 @@ function openPage(k){
 }
 
 function openField(i){
-  // reaching for a discipline turns the form too, so the mark behind the panel
-  // is never the one that was standing when the visitor arrived
-  startMorph(null);
   fieldIx = i; workIx = -1;
   const f = FIELDS[i];
   haltMedia(gridEl);
@@ -2331,7 +1860,8 @@ function openField(i){
     const c = document.createElement('button');
     c.type = 'button'; c.className = 'card'; c.dataset.tag = 'OPEN';
     c.innerHTML = '<span class="thumb">'+workMedia(w, f, i*97 + k*13 + 5, true)+'</span>' +
-      '<span class="meta"><b>'+esc(w.t)+'</b><span>'+esc(w.y || '')+'</span></span>';
+      '<span class="meta"><b>'+esc(w.t)+'</b><span>'+
+        esc([w.y, w.r].filter(Boolean).join(' \u2014 '))+'</span></span>';
     c.style.opacity = '0'; c.style.transform = 'translateY(16px)';
     c.addEventListener('pointerenter', ()=>blip(1180, 0.026));
     watchVideo(c.querySelector('video'));
@@ -2508,7 +2038,6 @@ function showShot(){
 
 function openLens(set, i, name){
   if(!set || !set.length) return;
-  zClear();                           // a new picture always opens squared up
   lensSet = set;
   lensIx = Math.max(0, Math.min(i | 0, set.length - 1));
   lensName = name || '';
@@ -2524,7 +2053,6 @@ function openLens(set, i, name){
 function stepLens(d){
   if(lensSet.length < 2) return;
   lensIx = (lensIx + d + lensSet.length) % lensSet.length;
-  zReset(true);                       // the one you were reading squares up as it goes
   paintLens();
   clearTimeout(lensSwap);
   lensImg.classList.add('swap');
@@ -2534,7 +2062,6 @@ function stepLens(d){
 
 function closeLens(){
   if(!lensOpen()) return;
-  zReset(true);
   lens.classList.remove('on');
   clearTimeout(lensSwap);
   setTimeout(()=>{
@@ -2564,185 +2091,23 @@ lens.addEventListener('wheel', e=>{
   stepLens(d > 0 ? 1 : -1);
 }, { passive:false });
 
-/* ── pinch to zoom, swipe to move, tap to dismiss ────────────────────────
-   Three readings of one surface, and they must never overlap. Two fingers
-   push the photo in, scaling it about the point held between them; once it
-   is larger than the screen a single finger moves it around; at rest a
-   sideways flick steps the folder and a tap on the backdrop closes.
-
-   The zoom is run here rather than handed to the browser's own pinch, which
-   would scale the entire overlay — chrome, backdrop, counter and all — and
-   leave the visitor stranded at 3x with no way to square it up again. This
-   way only the photograph moves, and letting go always leaves the interface
-   where it was. */
-const lensStage = document.querySelector('.lens-stage');
-const ZMAX = 4;                                  // far enough in to read grain
-let zS = 1, zX = 0, zY = 0;                      // scale, and offset in px
-const zPts = new Map();                          // every finger on the sheet
-let zGest = null, lensSwipe = null;
-
-const zoomed = ()=> zS > 1.01;
-
-function zApply(ease){
-  lensStage.classList.toggle('live', !ease);     // no easing under the fingers
-  lensStage.classList.toggle('zoom', zoomed());
-  lensImg.style.transform = (zS === 1 && !zX && !zY)
-    ? ''                                         // hand the frame back to the CSS
-    : 'translate3d(' + zX + 'px,' + zY + 'px,0) scale(' + zS + ')';
-}
-
-// the photo may be moved only as far as its own edges — never past them
-function zClamp(){
-  const mx = Math.max(0, (lensImg.clientWidth  * zS - innerWidth)  / 2);
-  const my = Math.max(0, (lensImg.clientHeight * zS - innerHeight) / 2);
-  zX = Math.max(-mx, Math.min(mx, zX));
-  zY = Math.max(-my, Math.min(my, zY));
-}
-
-let zSettle = null;
-
-// straight back to fit with no animation and no leftover state — for opening,
-// where the lift-in needs the stylesheet's own transition left alone
-function zClear(){
-  clearTimeout(zSettle);
-  zS = 1; zX = 0; zY = 0; zGest = null;
-  zPts.clear(); lensSwipe = null;
-  lensStage.classList.remove('live', 'zoom');
-  lensImg.style.transform = '';
-}
-
-function zReset(ease){
-  const was = zoomed();
-  clearTimeout(zSettle);
-  zS = 1; zX = 0; zY = 0; zGest = null;
-  if(ease !== false && was){
-    // hold the quick curve until the photo has actually landed back on fit,
-    // then let go of it so the open and swap animations get their own timing
-    lensStage.classList.remove('live');
-    lensStage.classList.add('zoom');
-    lensImg.style.transform = '';
-    zSettle = setTimeout(()=>lensStage.classList.remove('zoom'), 340);
-    return;
-  }
-  zApply(ease !== false);
-}
-
+/* swipe to move, tap the backdrop to dismiss — one gesture must not do both */
+let lensX0 = null, lensY0 = 0, lensDrag = false;
 lens.addEventListener('pointerdown', e=>{
-  if(e.target.closest('.lens-btn')) return;      // let the buttons be buttons
-  zPts.set(e.pointerId, { x:e.clientX, y:e.clientY });
-  // fingers are captured so a gesture that wanders off the photo keeps
-  // reporting; a mouse is left alone, so the desktop path is untouched
-  if(e.pointerType !== 'mouse'){ try{ lens.setPointerCapture(e.pointerId); }catch(err){} }
-
-  if(zPts.size === 2){                           // a second finger is a pinch,
-    lensSwipe = null;                            // and never a swipe or a tap
-    const [a, b] = [...zPts.values()];
-    zGest = { kind:'pinch', s0:zS, x0:zX, y0:zY,
-              d0:Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)),
-              mx:(a.x + b.x)/2, my:(a.y + b.y)/2 };
-    return;
-  }
-  if(zPts.size > 2){ zGest = null; lensSwipe = null; return; }
-
-  zGest = zoomed() ? { kind:'pan', px:e.clientX, py:e.clientY, x0:zX, y0:zY } : null;
-  lensSwipe = { x:e.clientX, y:e.clientY, moved:false, on:e.target };
+  if(e.target.closest('.lens-btn')) return;   // let the buttons be buttons
+  lensX0 = e.clientX; lensY0 = e.clientY; lensDrag = false;
 });
-
 lens.addEventListener('pointermove', e=>{
-  const p = zPts.get(e.pointerId);
-  if(p){ p.x = e.clientX; p.y = e.clientY; }
-  if(lensSwipe && Math.abs(e.clientX - lensSwipe.x) > 10) lensSwipe.moved = true;
-  if(!zGest) return;
-
-  if(zGest.kind === 'pinch' && zPts.size >= 2){
-    const [a, b] = [...zPts.values()];
-    const d = Math.max(1, Math.hypot(a.x - b.x, a.y - b.y));
-    const s = Math.max(1, Math.min(ZMAX, zGest.s0 * (d / zGest.d0)));
-    // the point between the fingers is the anchor: work out where it sits on
-    // the photograph itself, then place the photograph so it stays under them
-    const cx = innerWidth/2, cy = innerHeight/2;
-    const ux = (zGest.mx - cx - zGest.x0) / zGest.s0;
-    const uy = (zGest.my - cy - zGest.y0) / zGest.s0;
-    zS = s;
-    zX = (a.x + b.x)/2 - cx - s*ux;
-    zY = (a.y + b.y)/2 - cy - s*uy;
-    zClamp(); zApply(false);
-    return;
-  }
-  if(zGest.kind === 'pan'){
-    zX = zGest.x0 + (e.clientX - zGest.px);
-    zY = zGest.y0 + (e.clientY - zGest.py);
-    zClamp(); zApply(false);
-  }
-}, { passive:true });
-
-function lensLetGo(e){
-  const many = zPts.size > 1;
-  zPts.delete(e.pointerId);
-  try{ if(lens.hasPointerCapture(e.pointerId)) lens.releasePointerCapture(e.pointerId); }catch(err){}
-
-  if(many){                                      // coming out of a pinch
-    zGest = null; lensSwipe = null;
-    if(zS <= 1.02) zReset(true); else { zClamp(); zApply(true); }
-    // a finger still down carries straight on into a move, from where it is,
-    // so the photo doesn't jump the moment the other one lifts
-    if(zPts.size === 1 && zoomed()){
-      const [q] = [...zPts.values()];
-      zGest = { kind:'pan', px:q.x, py:q.y, x0:zX, y0:zY };
-    }
-    return;
-  }
-
-  const sw = lensSwipe;
-  zGest = null; lensSwipe = null;
-  if(!sw || e.type === 'pointercancel'){ if(zoomed()){ zClamp(); zApply(true); } return; }
-
-  const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
-  const tap = !sw.moved && Math.abs(dx) < 10 && Math.abs(dy) < 10;
-
-  // while the photo is in close, everything answers to the zoom: a tap squares
-  // it back up rather than closing, so no one can be stranded at 4x, and a
-  // drag has already moved it and wants no second reading
-  if(zoomed()){
-    if(tap) zReset(true); else { zClamp(); zApply(true); }
-    return;
-  }
+  if(lensX0 !== null && Math.abs(e.clientX - lensX0) > 10) lensDrag = true;
+});
+lens.addEventListener('pointercancel', ()=>{ lensX0 = null; });
+lens.addEventListener('pointerup', e=>{
+  if(lensX0 === null) return;
+  const dx = e.clientX - lensX0, dy = e.clientY - lensY0;
+  lensX0 = null;
   // horizontal intent only, so a vertical flick doesn't jump the image
   if(Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)){ stepLens(dx < 0 ? 1 : -1); return; }
-  if(tap && (sw.on === lensBg || sw.on === lens)) closeLens();
-}
-lens.addEventListener('pointerup', lensLetGo);
-lens.addEventListener('pointercancel', lensLetGo);
-
-/* Safari on iOS will happily run its own page zoom on top of this one, which
-   would scale the whole overlay and leave no way back. These are WebKit's own
-   gesture events, and they are only ever headed off over the lightbox — the
-   rest of the page can still be pinched by anyone who needs to read it. */
-['gesturestart','gesturechange','gestureend'].forEach(t=>
-  lens.addEventListener(t, e=>{ if(lensOpen()) e.preventDefault(); }, { passive:false }));
-lens.addEventListener('touchmove', e=>{
-  if(lensOpen() && e.touches.length > 1) e.preventDefault();
-}, { passive:false });
-
-// a turned phone changes what "as far as its own edges" means
-addEventListener('resize', ()=>{ if(lensOpen() && zoomed()){ zClamp(); zApply(true); } });
-
-/* ══ the photographs are not for taking ═══════════════════════════════════
-   Right-click on the desktop and the press-and-hold callout on a phone both
-   go nowhere over an image or over the lightbox — no "save image", no drag
-   to the desktop, no selection. Worth being straight about what this is: a
-   lock on the front door. The browser still has to fetch the files to draw
-   them, so anyone who knows their way around devtools or the network tab can
-   still get at them. What it does stop is the casual, thoughtless save, and
-   that is nearly all of it. */
-document.addEventListener('contextmenu', e=>{
-  const t = e.target;
-  if(t.closest && (t.closest('img') || t.closest('.lens') || t.closest('.thumb,.shot,.gal,.client')))
-    e.preventDefault();
-}, { capture:true });
-
-document.addEventListener('dragstart', e=>{
-  if(e.target && e.target.tagName === 'IMG') e.preventDefault();
+  if(!lensDrag && (e.target === lensBg || e.target === lens)) closeLens();
 });
 
 addEventListener('keydown', e=>{
@@ -2764,55 +2129,43 @@ const ret = document.getElementById('ret');
 const retTag = document.getElementById('rettag');
 const fpsOut = document.getElementById('fps');
 
-/* Fullscreen is the one state where the site's own cursor cannot follow: the
-   video is painted over the whole page, reticle included. The CSS hands the
-   real pointer back; this puts the reticle away while it is gone, so nothing
-   is chasing a cursor nobody can see, and returns it on the way out. The
-   body flag exists because the fullscreen pseudo-classes are inconsistently
-   applied to media elements across engines — the class is not. */
-const fsOn = ()=> !!(document.fullscreenElement || document.webkitFullscreenElement);
-let retWasOn = false;
-
-function syncFullscreen(){
-  const on = fsOn();
-  document.body.classList.toggle('fs', on);
-  if(on){
-    retWasOn = ret.classList.contains('on');
-    ret.classList.remove('on');
-  }else if(retWasOn){
-    retWasOn = false;
-    ret.classList.add('on');
-  }
-}
-document.addEventListener('fullscreenchange', syncFullscreen);
-document.addEventListener('webkitfullscreenchange', syncFullscreen);
-
 const raycaster = new THREE.Raycaster();
 const ndcPt = new THREE.Vector2();
 const target = new THREE.Vector3();
-let reveal = 0;   // how open the wireframe reveal is — mouse hover only, never touch
 const ndc = new THREE.Vector3();
 let mx=0, my=0, px=0, py=0, touched=false, clock=0, intro=0, radius=0, rGoal=0;
-let lastPick = 0;                 // when the hover ray was last cast
 let pointerX = innerWidth/2, pointerY = innerHeight/2, retX = pointerX, retY = pointerY;
-let VX = 0, VY = 0, VW = innerWidth, VH = innerHeight, visH = 4.5, centreY = 0, formScale = 1, formScaleGoal = 1;
+let VX = 0, VY = 0, VW = innerWidth, VH = innerHeight, visH = 4.5, centreY = 0;
 let letterW = 2.1, letterH = FIT;
 const cxMid = ()=> VX + VW/2;
 const cyMid = ()=> VY + VH/2;
-let spin = 0, spinV = 0, groupX = 0;
+let spin = 0, spinV = 0, groupX = 0, spinKick = null;
+
+// a tap on the form spins it one full turn about the vertical axis. Rather
+// than decelerating straight into a stop — which reads as an abrupt halt no
+// matter how eased the curve — it overshoots the turn slightly and rocks
+// back to settle exactly on it, the way you'd shape it with an overshoot
+// keyframe in After Effects' graph editor: fast out, past the mark, a soft
+// return, done. Runs on its own clock rather than the drag/flick physics
+// below, so it can't be interrupted or slowed by residual momentum.
+function easeOvershoot(x, overshoot){
+  const c3 = overshoot + 1;
+  return 1 + c3 * Math.pow(x - 1, 3) + overshoot * Math.pow(x - 1, 2);
+}
+function quickSpin(){
+  if(reduce) return;              // respect prefers-reduced-motion
+  spinKick = { from: spin, t0: performance.now(), dur: 900 };
+}
 
 // the reticle invites you in, then tells you what a tap will do
 function syncTag(){
   retTag.textContent = hoverForm ? (started ? 'MORPH' : 'INTERACT') : '';
 }
 
-// called on every pointer event, so it hands back a vector it owns rather
-// than cloning the camera's position each time and leaving it to the collector
-const worldPt = new THREE.Vector3();
 function toWorld(cx, cy){
   ndc.set(((cx - VX)/VW)*2-1, -((cy - VY)/VH)*2+1, 0.5).unproject(camera);
   ndc.sub(camera.position).normalize();
-  return worldPt.copy(camera.position).addScaledVector(ndc, -camera.position.z/ndc.z);
+  return camera.position.clone().addScaledVector(ndc, -camera.position.z/ndc.z);
 }
 
 function pick(cx, cy){
@@ -2831,34 +2184,18 @@ addEventListener('pointermove', e=>{
   rGoal = 1;
   if(!touched) touched = true;
   if(coarse) return;
-  if(fsOn()) return;      // the real cursor has the room; nothing to stand in for
 
   ret.classList.add('on');
 
   const ui = e.target.closest ? e.target.closest('[data-tag]') : null;
   const inPanel = e.target.closest ? e.target.closest('.panel,.lens') : null;
+  const over = !ui && !inPanel && !!pick(e.clientX, e.clientY);
 
-  /* Casting a ray at the mesh is the expensive half of this handler, and a
-     pointer reports as fast as the machine will let it — on a high-polling
-     mouse that is several hundred times a second, for an answer that only
-     ever changes when the cursor crosses an edge. A cast every twenty-five
-     milliseconds is below anyone's threshold for noticing and takes the
-     cost off the machines this is for. The reticle itself is not throttled:
-     it follows pointerX/pointerY, which are set above. */
-  const tNow = performance.now();
-  if(tNow - lastPick > 25){
-    lastPick = tNow;
-    const hit = !ui && !inPanel && !!pick(e.clientX, e.clientY);
-    if(hit !== hoverForm){
-      hoverForm = hit;
-      if(hit){ blip(1500, 0.035); exploreIntro = false; }   // they've found it
-    }
+  if(over !== hoverForm){
+    hoverForm = over;
+    if(over){ blip(1500, 0.035); exploreIntro = false; }   // they've found it
   }
-  // this one stays on every move: it is a class check and a timer, and the
-  // ring's grace period is measured from the last move rather than the last
-  // cast — throttling it would take the drift out to a label away
   refreshExplore();
-  const over = hoverForm;
 
   // the direction you lean picks the field
   if(exploreEl.classList.contains('on') && !ui && !stacked()){
@@ -2954,6 +2291,7 @@ function letGo(e){
   if(!hit){ refreshExplore(); return; }
   strikeAt(hit);
   startMorph(matte ? matte.worldToLocal(hit.point.clone()) : null);
+  quickSpin();
   hoverForm = true;
   refreshExplore();
 }
@@ -3033,7 +2371,6 @@ function applyTheme(){
     outline.material.color.set(T.line);
     outline.material.opacity = T.lineOp;
     wire.material.color.set(T.line);
-    wireThru.material.color.set(T.line);
   }
   syncDust();
   drawPoster(VW, VH, DPR);
@@ -3075,21 +2412,10 @@ function fitView(){
   const wFrac = stacked() ? 0.74 : 0.60;      // of the full width
   const aspect = VW / VH;
 
-  // the camera is framed against a fixed FIT×FIT reference box rather than
-  // whichever shape is currently on screen, so swapping to a taller or wider
-  // form never moves the camera itself — that would drag the background
-  // field and everything else along with it. Only the form is rescaled, by
-  // however much its own letterW/letterH fall short of the reference, so it
-  // still lands on the same target fraction of the frame every time.
-  visH = Math.max(FIT * VH / (freeH * hFrac), FIT / (wFrac * aspect), 3.4);
+  visH = Math.max(letterH * VH / (freeH * hFrac), letterW / (wFrac * aspect), 3.4);
   camera.position.z = visH / (2*Math.tan(FOV*Math.PI/360));
   camera.aspect = aspect;
   camera.updateProjectionMatrix();
-
-  const idealVisH = Math.max(letterH * VH / (freeH * hFrac), letterW / (wFrac * aspect), 3.4);
-  formScaleGoal = visH / idealVisH;
-  // the frame loop eases formScale toward this goal rather than snapping to
-  // it here, so a model swap settles into its new size instead of popping.
 
   // put the form in the middle of the free band rather than the middle of the glass
   const centrePx = band.t + freeH/2;
@@ -3102,148 +2428,35 @@ function fitPoster(){
   poster.scale.set(h*camera.aspect, h, 1);
 }
 
-/* Repainting the backdrop means filling a full-screen canvas and handing the
-   result to the driver as a new texture. That is fine once; it is not fine
-   on every resize event, and on a phone the address bar sliding in and out
-   of view fires resize continuously while the page is scrolled. Everything
-   else here is arithmetic and cheap, so the redraw is the one thing held
-   back until the size has stopped changing. */
-let posterJob = null;
-function posterSoon(){
-  clearTimeout(posterJob);
-  posterJob = setTimeout(()=>drawPoster(VW, VH, DPR), 150);
-}
-
 function resize(){
   fitView();
   renderer.setSize(VW, VH, false);
   fitPoster();
   sizeDust();
-  posterSoon();
+  drawPoster(VW, VH, DPR);
   placeChips();
   refreshExplore();
 }
-
-// resize can arrive several times before a frame is drawn; there is no point
-// running the layout more than once for the same frame
-let resizeJob = 0;
-function resizeSoon(){
-  cancelAnimationFrame(resizeJob);
-  resizeJob = requestAnimationFrame(resize);
-}
-addEventListener('resize', resizeSoon);
+addEventListener('resize', resize);
 addEventListener('orientationchange', ()=>setTimeout(resize, 120));
-if(window.visualViewport) visualViewport.addEventListener('resize', resizeSoon);
-/* ══ tier ═════════════════════════════════════════════════════════════════
-   One function holds everything a tier decides, so there is a single place
-   to read and a single place to change. It is safe to call at any moment:
-   the pieces that do not exist yet are skipped and picked up when they are
-   built. */
-let fieldEvery = 1;      // how many frames between field updates
-let capMs = 0;           // minimum ms between drawn frames, 0 for uncapped
-
-function applyTier(){
-  document.body.classList.toggle('lite', tier <= 1);
-  document.body.classList.toggle('min',  tier === 0);
-
-  DPR = dprFor(tier);
-  renderer.setPixelRatio(DPR);
-
-  // the dots are individually placed on the CPU and their matrices uploaded
-  // whole, so both the arithmetic and the upload come down with the count
-  if(field) field.count = tier >= 2 ? blocks.length
-                        : Math.max(24, Math.ceil(blocks.length * (tier === 1 ? 0.68 : 0.42)));
-  fieldEvery = tier >= 2 ? 1 : (tier === 1 ? 2 : 3);
-
-  /* At the bottom, thirty frames held steadily beat forty-five that arrive
-     when they feel like it — the eye reads the unevenness, not the number.
-     It also leaves the machine some headroom instead of running it flat out
-     into a thermal wall. The motion is timed against the clock rather than
-     the frame now, so nothing slows down when this comes on. */
-  capMs = tier === 0 ? 1000/32 : 0;
-
-  // the grain tile is only encoded if the page started at full quality; if it
-  // has climbed back up to it since, the layer is unhidden with nothing in it
-  if(tier > 1 && grainPattern){
-    const gEl = document.getElementById('grain');
-    if(gEl && !gEl.style.backgroundImage){
-      try{ gEl.style.backgroundImage = 'url('+grainPattern.toDataURL()+')'; }catch(e){}
-    }
-  }
-
-  tuneGlass();
-  resize();
-}
-
-/* The initial guess is only a guess. This watches what the page is actually
-   managing and moves the tier to match — down after a run of slow frames,
-   and back up only if the guess started low and has never been proved
-   right. Once a tier has failed it is not returned to, which is what keeps
-   this from oscillating between two settings for the whole visit. */
-let slowRun = 0, fastRun = 0, everDropped = false;
-let settleAt = performance.now() + 3000;      // boot is not representative
-
-function gauge(fps){
-  const t = performance.now();
-  if(t < settleAt || morph) return;           // morphs are a spike, not a trend
-  // the bottom tier holds itself at about thirty by design, so "keeping up"
-  // there cannot be read against the same number as an uncapped one — without
-  // this a device put on the bottom tier by a bad guess could never leave it
-  const upBar = capMs ? 30.5 : 52;
-  if(fps < 26){
-    fastRun = 0;
-    if(++slowRun >= 3 && tier > 0){
-      tier--; everDropped = true; slowRun = 0;
-      settleAt = t + 3000;
-      applyTier();
-    }
-  }else if(fps > upBar && !everDropped && tier < startTier + 1 && tier < 2){
-    slowRun = 0;
-    if(++fastRun >= 16){                      // eight clean seconds
-      tier++; fastRun = 0;
-      settleAt = t + 4000;
-      applyTier();
-    }
-  }else{
-    slowRun = 0; fastRun = 0;
-  }
-}
-
+if(window.visualViewport) visualViewport.addEventListener('resize', resize);
 resize();
 applyTheme();
-applyTier();
 // the bars change height once the webfont lands, so measure again
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(resize).catch(()=>{});
 setTimeout(resize, 400);
 
 /* ══ frame ════════════════════════════════════════════════════════════════ */
 let first = true, last = performance.now(), fpsAcc = 0, fpsN = 0, bootP = 0;
-let fieldTick = 0, retDrawnX = -1e6, retDrawnY = -1e6;
-
-/* Nothing to draw for: the tab is in the background, or something opaque is
-   covering the whole canvas. The archive panel is full width below 900, and
-   the lightbox covers everything at any width — in both cases the scene is
-   being rendered, transmission pass and all, to be painted over. Standing
-   the loop down there is what makes reading a project or pinching a
-   photograph smooth on a phone, since the work the frame was doing is
-   exactly the work the gesture needs. */
-const covered = ()=> (!lens.hidden && lens.classList.contains('on'))
-                  || (panelOpen && VW <= 900);
 
 function frame(now){
   requestAnimationFrame(frame);
-
-  if(document.hidden || covered()){ last = now; return; }
-  // last is only moved when a frame is actually stepped, so the cap holds
-  // frames back without the elapsed time being lost from the motion
-  if(capMs && now - last < capMs - 1) return;
-
   const dt = Math.min(0.05, (now - last)/1000 || 0.016);
   last = now;
-  clock += dt * 0.41;                          // was 0.0068 a frame, i.e. this at 60
+  clock += 0.0068;
 
   if(bootP < 100){
-    bootP += ((ready ? 100 : 88) - bootP) * damp(ready ? 0.16 : 0.05, dt);
+    bootP += ((ready ? 100 : 88) - bootP) * (ready ? 0.16 : 0.05);
     bootfill.style.width = Math.min(100, bootP) + '%';
     bootpct.textContent = String(Math.round(Math.min(100, bootP))).padStart(2,'0');
     if(ready && bootP > 99.2 && first){
@@ -3255,7 +2468,7 @@ function frame(now){
   }
 
   if(ready){
-    intro = Math.min(1, intro + dt * 0.54);    // was 0.009 a frame
+    intro = Math.min(1, intro + 0.009);
     const ease = 1 - Math.pow(1 - intro, 3);
 
     if(!touched || reduce){
@@ -3263,57 +2476,43 @@ function frame(now){
       rGoal = reduce ? 1 : 0.9;
     }
 
-    radius += (rGoal - radius) * damp(rGoal < radius ? 0.14 : 0.055, dt);   // quick to let go
-    uC.value.lerp(target, damp(touched ? 0.16 : 0.05, dt));
+    radius += (rGoal - radius) * (rGoal < radius ? 0.14 : 0.055);   // quick to let go
+    uC.value.lerp(target, touched ? 0.16 : 0.05);
     uR1.value = 0.62 * radius * ease;
     uR2.value = 1.02 * radius * ease;
 
-    // wireframe reveal: mouse hover only — a touch device has no hover, so
-    // coarse pointers never open the shell this way. An open panel is no
-    // reason to withhold it: on a wide screen the form is still sitting there
-    // beside the archive, and pointing at it should do what it always does.
-    // On a narrow one the panel covers the form outright, and the hover test
-    // already refuses anything inside .panel, so there is nothing to guard.
-    const wantReveal = !coarse && !morph && hoverForm;
-    reveal += ((wantReveal ? 1 : 0) - reveal) * damp(wantReveal ? 0.13 : 0.09, dt);
-    if(reveal < 0.002) reveal = 0;
-    uReveal.value = reveal;
-    // the hidden-line pass follows the reveal, a little under the front lines
-    // so the near side of the mesh still reads as the near side
-    wireThru.material.opacity = reveal * 0.42 * formFade;
-    wireThru.visible = reveal > 0.01 && formFade > 0.02;
-
-    // the turn about the local up axis, with weight — wheel, drag or flick.
-    // spinV is an angle per sixtieth of a second, so it is scaled by however
-    // much of one this frame was, and decayed over the same span
-    const f60 = dt * 60;
-    spin += spinV * f60;
-    spinV *= Math.pow(reduce ? 0.7 : 0.945, f60);
-    if(Math.abs(spinV) < 0.00002) spinV = 0;
+    // the turn about the local up axis, with weight — wheel, drag or flick,
+    // unless a tap-triggered full turn is playing out, which takes over the
+    // wheel entirely until it lands
+    if(spinKick){
+      const k = Math.min(1, (performance.now() - spinKick.t0) / spinKick.dur);
+      const eased = easeOvershoot(k, 1.4);
+      spin = spinKick.from + Math.PI*2 * eased;
+      if(k >= 1){ spinKick = null; spinV = 0; }
+    } else {
+      spin += spinV;
+      spinV *= reduce ? 0.7 : 0.945;
+      if(Math.abs(spinV) < 0.00002) spinV = 0;
+    }
 
     // the tip from a vertical drag drifts back to level once the hand is off
-    tilt += tiltV * f60;
-    tiltV *= Math.pow(reduce ? 0.7 : 0.9, f60);
+    tilt += tiltV;
+    tiltV *= reduce ? 0.7 : 0.9;
     if(Math.abs(tiltV) < 0.00002) tiltV = 0;
-    if(!grab) tilt *= Math.pow(0.992, f60);
+    if(!grab) tilt *= 0.992;
     tilt = THREE.MathUtils.clamp(tilt, -0.9, 0.9);
 
     // the form steps aside when the archive is open
     const gx = (panelOpen && VW > 900) ? -1.55 : 0;
-    groupX += (gx - groupX) * damp(0.055, dt);
+    groupX += (gx - groupX) * 0.055;
 
-    const lean = damp(0.04, dt);
-    px += (mx - px)*lean; py += (my - py)*lean;
+    px += (mx - px)*0.04; py += (my - py)*0.04;
     group.rotation.y = spin + px*0.42 + Math.sin(clock*0.75)*0.13 + (1-ease)*0.8;
     group.rotation.x = -py*0.26 + Math.sin(clock*0.53)*0.08 + tilt;
     group.rotation.z = Math.sin(clock*0.41)*0.045;
     group.position.x = groupX;
     group.position.y = centreY + Math.sin(clock*1.15)*0.1;
-    // the target size a swap asks for is reached gradually rather than in
-    // one jump, so a much bigger or smaller form eases into place
-    formScale += (formScaleGoal - formScale) * damp(reduce ? 0.18 : 0.09, dt);
-
-    group.scale.setScalar(formScale * (0.9 + 0.1*ease) * (panelOpen && VW > 900 ? 0.86 : 1));
+    group.scale.setScalar((0.9 + 0.1*ease) * (panelOpen && VW > 900 ? 0.86 : 1));
 
     stepMorph(dt);
     applyFade(ease);
@@ -3347,35 +2546,21 @@ function frame(now){
       if(strike.intensity < 0.05){ strike.intensity = 0; strike.visible = false; }
     }
 
-    /* Every dot is placed on the CPU and the whole matrix buffer is handed
-       back to the driver afterwards, so this is the one part of the loop
-       whose cost is a list length. Off the top tier it runs every second or
-       third frame instead — the dots breathe slowly enough that nobody can
-       tell, and the frames in between are free. */
-    if((fieldTick++ % fieldEvery) === 0)
-      updateField(ease, clock*8, waveWorld, uPR.value, waveI);
+    updateField(ease, clock*8, waveWorld, uPR.value, waveI);
   }
 
   if(!coarse){
-    const chase = damp(0.42, dt);
-    retX += (pointerX - retX) * chase;
-    retY += (pointerY - retY) * chase;
-    // once it has caught up it stays caught up, and rewriting the same
-    // transform every frame is a style recalculation for no change at all
-    if(Math.abs(retX - retDrawnX) > 0.08 || Math.abs(retY - retDrawnY) > 0.08){
-      retDrawnX = retX; retDrawnY = retY;
-      ret.style.transform = 'translate(' + retX.toFixed(1) + 'px,' + retY.toFixed(1) + 'px) translate(-50%,-50%)';
-    }
+    retX += (pointerX - retX) * 0.42;
+    retY += (pointerY - retY) * 0.42;
+    ret.style.transform = 'translate(' + retX.toFixed(1) + 'px,' + retY.toFixed(1) + 'px) translate(-50%,-50%)';
   }
 
   renderer.render(scene, camera);
 
   fpsAcc += dt; fpsN++;
   if(fpsAcc >= 0.5){
-    const fps = fpsN / fpsAcc;
-    fpsOut.textContent = String(Math.round(fps)).padStart(2,'0');
+    fpsOut.textContent = String(Math.round(fpsN / fpsAcc)).padStart(2,'0');
     fpsAcc = 0; fpsN = 0;
-    gauge(fps);                                // and the tier follows the score
   }
 }
 requestAnimationFrame(frame);
@@ -3386,38 +2571,19 @@ requestAnimationFrame(frame);
    clients/ or replacing about/cv.pdf is the whole workflow — this file
    never needs to change. */
 
-/* the one arrow, pointed wherever it is needed: 'r' 'l' 'u' 'd' 'ur' */
-const ico_ = dir =>
-  '<svg class="ico ico-'+dir+'" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-    '<path d="M3.2 12h16.2"/><path d="M13.4 6l6 6-6 6"/></svg>';
-
-/* [label, value, href, mark] — mark is a direction for ico_ */
-const rows_ = list => list.map(([label, value, href, mark]) => {
-  const inner = esc(label) + '<em>' + esc(value) + (mark ? ico_(mark) : '') + '</em>';
-  return href
-    ? '<a href="'+esc(href)+'"'+(/^https?:/i.test(href) ? ' target="_blank" rel="noopener"' : '') +
-      ' data-tag="'+esc(label)+'">'+inner+'</a>'
-    : '<span>'+inner+'</span>';
-}).join('');
+const rows_ = list => list.map(([label, value, href]) => href
+  ? '<a href="'+esc(href)+'"'+(/^https?:/i.test(href) ? ' target="_blank" rel="noopener"' : '') +
+    ' data-tag="'+esc(label)+'">'+esc(label)+'<em>'+esc(value)+'</em></a>'
+  : '<span>'+esc(label)+'<em>'+esc(value)+'</em></span>'
+).join('');
 
 const block_ = (title, inner) =>
   '<div class="block"><b>'+esc(title)+'</b><div class="rows">'+inner+'</div></div>';
 
-/* same block furniture, chips instead of rows */
-const tagblock_ = (title, items) =>
-  '<div class="block"><b>'+esc(title)+'</b><div class="taglist">' +
-  items.map(s=>'<span>'+esc(s)+'</span>').join('') + '</div></div>';
-
-/* about.skills is [{ label, items }] — one block per group */
-const skills_ = groups => (groups || [])
-  .filter(g => g && g.items && g.items.length)
-  .map(g => tagblock_((g.label || 'SKILLS').toUpperCase(), g.items))
-  .join('');
-
 const elsewhere_ = links => {
   const entries = Object.entries(links || {});
   return entries.length
-    ? block_('ELSEWHERE', rows_(entries.map(([k, v]) => [k.toUpperCase(), '', v, 'ur'])))
+    ? block_('ELSEWHERE', rows_(entries.map(([k, v]) => [k.toUpperCase(), '\u2197', v])))
     : '';
 };
 
@@ -3452,18 +2618,21 @@ function buildPages(c){
   pages.ABOUT = {
     sub: (site.role || 'PROFILE').toUpperCase(),
     html: ()=>
-      '<div class="who">' +
-        (about.headline ? '<h3>'+esc(about.headline)+'</h3>' : '') +
-        shot +
-        '<div class="said">' + paras.map(p=>'<p>'+p+'</p>').join('') + '</div>' +
+      '<div class="who">' + shot +
+        '<div class="said">' +
+          (about.headline ? '<h3>'+esc(about.headline)+'</h3>' : '') +
+          (paras[0] ? '<p>'+paras[0]+'</p>' : '') +
+        '</div>' +
       '</div>' +
-      skills_(about.skills) +
+      paras.slice(1).map(p=>'<p>'+p+'</p>').join('') +
       (cv ? block_('DOCUMENTS', rows_([[
         'CURRICULUM VITAE',
-        'PDF \u00b7 ' + cv.size + ' \u00b7 ' + cv.updated,
-        cv.src + (cv.hash ? '?v=' + cv.hash : ''),
-        'd'
+        'PDF \u00b7 ' + cv.size + ' \u00b7 ' + cv.updated + ' \u2193',
+        cv.src + (cv.hash ? '?v=' + cv.hash : '')
       ]])) : '') +
+      (c.fields && c.fields.length
+        ? block_('PRACTICE', rows_(c.fields.map(f=>[f.key, f.sub])))
+        : '') +
       elsewhere_(site.links)
   };
 
@@ -3485,7 +2654,7 @@ function buildPages(c){
       (clients.lede ? '<p class="lede">'+esc(clients.lede)+'</p>' : '') +
       (tiles ? '<div class="clients">'+tiles+'</div>' : '') +
       (engagements.length
-        ? block_('ENGAGEMENTS', rows_(engagements.map(e=>[e.name, e.year || ''])))
+        ? block_('ENGAGEMENTS', rows_(engagements.map(e=>[e.name, e.scope + (e.year ? ' \u2014 ' + e.year : '')])))
         : '') +
       (logos.length ? '' : '<p class="note">Drop a logo into clients/ and it appears here.</p>')
   };
@@ -3518,24 +2687,7 @@ document.addEventListener('click', e=>{
 const yearEl = document.getElementById('year');
 if(yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-/* the model folder is inventoried by the same build step as everything else,
-   so a new .glb needs no edit here. The fallback covers a folder served
-   without the build script having run. */
-function bootBench(c){
-  const m = c && c.models;
-  let list = [];
-  if(Array.isArray(m)) list = m;
-  else if(m && typeof m === 'object') list = m.alts || m.models || [];
-  if(list.length){ setBench(list); return; }
-
-  fetch(MODEL_DIR + 'models.json', { cache:'no-cache' })
-    .then(r => r.ok ? r.json() : null)
-    .then(j => { if(j) setBench(Array.isArray(j) ? j : (j.alts || j.models || [])); })
-    .catch(()=>{});
-}
-
 function applyContent(c){
-  bootBench(c);
   FIELDS = c.fields || [];
   PAGES = buildPages(c);
 
@@ -3552,7 +2704,6 @@ fetch('content.json', { cache: 'no-cache' })
   .then(applyContent)
   .catch(err=>{
     console.error('[content]', err);
-    bootBench(null);          // the forms are independent of the site index
     document.getElementById('practice').textContent = 'CONTENT UNAVAILABLE';
     PAGES = { ABOUT: { sub:'UNAVAILABLE', html:()=>
       '<p class="lede">The site index could not be loaded.</p>' +
