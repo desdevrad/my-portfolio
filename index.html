@@ -389,6 +389,13 @@
   body.light .client:hover img{filter:none}
 
   .detail-img{position:relative}
+
+  /* A video gets its own frame: 16:9 by default, corrected to the file's real
+     ratio the moment metadata loads. `contain` then fits the whole frame —
+     a wide video is never cropped at the sides to fill the 10/7 still box. */
+  .detail-img.is-video{aspect-ratio:var(--media-ar,16/9)}
+  .detail-img.is-video video{object-fit:contain;background:#000}
+
   .detail-img img{width:100%;height:100%;object-fit:cover;display:block}
   .detail-img img[role=button]:focus-visible{outline:1px solid var(--ice);outline-offset:-3px}
   .detail-img::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
@@ -2202,7 +2209,23 @@ function openWork(k){
   dimg.innerHTML = media + play;
   const pl = dimg.querySelector('.play');
   if(pl) pl.addEventListener('pointerenter', ()=>blip(1320, 0.03));
-  watchVideo(dimg.querySelector('video'));
+
+  /* Video projects size their frame to the footage, not to the still-image
+     box, so 16:9 motion work is shown whole. */
+  const vid = dimg.querySelector('video');
+  dimg.classList.toggle('is-video', !!vid);
+  dimg.style.removeProperty('--media-ar');
+  if(vid){
+    const fitFrame = ()=>{
+      if(vid.videoWidth && vid.videoHeight){
+        dimg.style.setProperty('--media-ar', vid.videoWidth + '/' + vid.videoHeight);
+      }
+    };
+    vid.addEventListener('loadedmetadata', fitFrame);
+    fitFrame();
+  }
+
+  watchVideo(vid);
 
   /* the cover leads, then everything else in the folder */
   const shots = (w.img ? [w.img] : []).concat(w.gallery || []);

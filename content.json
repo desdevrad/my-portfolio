@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-19T16:56:21.057Z",
+  "generated": "2026-08-19T17:06:00.397Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -141,11 +141,6 @@
       {
         "name": "WILLOW BEAUTY PRODUCTS",
         "scope": "CREATIVE DIRECTION",
-        "year": "2023"
-      },
-      {
-        "name": "SELF-INITIATED",
-        "scope": "3D DESIGN",
         "year": "2023"
       }
     ]
@@ -514,7 +509,8 @@
             "3D Design",
             "Blender",
             "Experimental Branding"
-          ]
+          ],
+          "self": true
         }
       ]
     },
