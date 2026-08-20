@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-20T14:53:19.803Z",
+  "generated": "2026-08-20T16:05:05.407Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -140,6 +140,11 @@
       },
       {
         "name": "TROID",
+        "scope": "CREATIVE DIRECTION",
+        "year": "2023"
+      },
+      {
+        "name": "UPZONE",
         "scope": "CREATIVE DIRECTION",
         "year": "2023"
       },
@@ -423,6 +428,35 @@
           ]
         },
         {
+          "slug": "upzone",
+          "t": "UPZONE",
+          "c": "UpZone",
+          "y": "2023",
+          "r": "Creative Director & Designer",
+          "img": "projects/01-logos/upzone/cover.webp",
+          "video": null,
+          "gallery": [
+            "projects/01-logos/upzone/01.webp",
+            "projects/01-logos/upzone/02.webp",
+            "projects/01-logos/upzone/03.webp",
+            "projects/01-logos/upzone/04.webp",
+            "projects/01-logos/upzone/05.webp",
+            "projects/01-logos/upzone/06.webp"
+          ],
+          "link": null,
+          "tag": "LOGO & VISUAL IDENTITY / 2023",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "UpZone is an interior architecture and design platform that helps clients design, renovate, and transform their homes. The service provides interior design and renovation solutions through its website, helping users improve their living spaces with professional guidance.",
+          "a": "As the Creative Director and Designer, I am responsible for developing the logo and visual identity for UpZone. The logo combines three core elements: the letter “U”, a simplified representation of a house, and an upward arrow.\nThe combination connects the brand name with its purpose, using the house to represent the client's living space and the arrow to communicate improvement, transformation, and moving a space to a new level. The resulting identity is designed to feel simple, contemporary, and relevant to the field of interior architecture.",
+          "credit": null,
+          "roles": [
+            "Creative Direction",
+            "Logo Design",
+            "Visual Identity Design"
+          ]
+        },
+        {
           "slug": "willow",
           "t": "WILLOW",
           "c": "Willow Beauty Products",
@@ -489,7 +523,7 @@
       "works": [
         {
           "slug": "divar-hackathon2025",
-          "t": "DIVAR HACKATHON 2025",
+          "t": "DIVAR'S HACKATHON 2025",
           "c": "Divar",
           "y": "2025",
           "r": "Creative Director & Designer",
@@ -517,7 +551,7 @@
         },
         {
           "slug": "divar-yalda2025",
-          "t": "DIVAR YALDA 2024",
+          "t": "DIVAR'S YALDA 2024",
           "c": "Divar",
           "y": "2024",
           "r": "Creative Director & Designer",
@@ -531,7 +565,7 @@
           "tag": "EVENT IDENTITY / YALDA / 2024",
           "lb": "OVERVIEW",
           "la": "CONTRIBUTION",
-          "b": "Divar Yalda was a celebration organized for the Divar team around Yalda Night, one of the most important Iranian cultural traditions. The event brought together familiar elements of Yalda, including pomegranates, nuts, Hafez poetry, music, and other symbols associated with the celebration.",
+          "b": "Divar Yalda is an internal celebration organized for Divar employees around Yalda Night, one of the most important Iranian cultural traditions. The event brings together the team to celebrate Yalda Night.",
           "a": "As the Creative Director and Designer, I was responsible for designing the event poster and visual direction. I combined traditional Yalda elements such as pomegranates, nuts, Hafez's poetry, and music with the existing visual language of Divar.\nThe goal was to create a visual that felt distinctly connected to Yalda while remaining consistent with Divar's brand identity. These cultural references were reinterpreted through Divar's visual system to create a cohesive and contemporary event graphic.",
           "credit": null,
           "roles": [
