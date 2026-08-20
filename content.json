@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-20T16:05:05.407Z",
+  "generated": "2026-08-20T18:56:18.610Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -139,6 +139,11 @@
         "year": "2024"
       },
       {
+        "name": "AETHERA PHARMACEUTICALS",
+        "scope": "CREATIVE DIRECTION",
+        "year": "2023"
+      },
+      {
         "name": "TROID",
         "scope": "CREATIVE DIRECTION",
         "year": "2023"
@@ -156,7 +161,7 @@
       {
         "name": "MOLKO",
         "scope": "CREATIVE DIRECTION",
-        "year": "2020"
+        "year": "2021"
       }
     ]
   },
@@ -396,6 +401,36 @@
           ]
         },
         {
+          "slug": "aethera",
+          "t": "AETHERA PHARMACEUTICALS",
+          "c": "Aethera Pharmaceuticals",
+          "y": "2023",
+          "r": "Creative Director & Designer",
+          "img": "projects/01-logos/aethera/cover.webp",
+          "video": null,
+          "gallery": [
+            "projects/01-logos/aethera/01.webp",
+            "projects/01-logos/aethera/02.webp",
+            "projects/01-logos/aethera/03.webp",
+            "projects/01-logos/aethera/04.webp",
+            "projects/01-logos/aethera/05.webp",
+            "projects/01-logos/aethera/06.webp",
+            "projects/01-logos/aethera/07.webp"
+          ],
+          "link": null,
+          "tag": "LOGO & VISUAL IDENTITY / 2023",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "Aethera Pharmaceuticals is a pharmaceutical company focused on improving human health through innovation, integrity, and transparency. The brand aims to build trust through forward-thinking healthcare solutions while maintaining a strong commitment to patients and ethical practices.",
+          "a": "As the Creative Director and Designer, I am responsible for developing the logo and visual identity for Aethera Pharmaceuticals. The logo concept combines the familiar visual language of pharmaceutical capsules with a minimal approach to negative space.\nThe shape of pills is used to construct a bold, clean “A” within the negative space, directly connecting the symbol to Aethera's name and its focus on healthcare. The resulting identity balances simplicity and recognition while creating a distinctive visual mark rooted in the pharmaceutical context.",
+          "credit": null,
+          "roles": [
+            "Creative Direction",
+            "Logo Design",
+            "Visual Identity Design"
+          ]
+        },
+        {
           "slug": "troid",
           "t": "TROID",
           "c": "Troid",
@@ -491,7 +526,7 @@
           "slug": "molko",
           "t": "MOLKO",
           "c": "Molko",
-          "y": "2020",
+          "y": "2021",
           "r": "Creative Director & Designer",
           "img": "projects/01-logos/molko/cover.webp",
           "video": null,
@@ -501,7 +536,7 @@
             "projects/01-logos/molko/03.webp"
           ],
           "link": null,
-          "tag": "LOGO & VISUAL IDENTITY / 2020",
+          "tag": "LOGO & VISUAL IDENTITY / 2021",
           "lb": "OVERVIEW",
           "la": "CONTRIBUTION",
           "b": "Molko is an educational website focused on chemistry, created to make chemistry-related knowledge and learning resources more accessible through a digital platform.",
