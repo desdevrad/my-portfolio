@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-20T18:56:18.610Z",
+  "generated": "2026-08-20T21:41:39.880Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -136,6 +136,11 @@
       {
         "name": "DIVAR",
         "scope": "CREATIVE DIRECTION",
+        "year": "2024"
+      },
+      {
+        "name": "RUSHIN",
+        "scope": "ART DIRECTION",
         "year": "2024"
       },
       {
@@ -607,6 +612,37 @@
             "Creative Direction",
             "Poster Design",
             "Visual Identity Design"
+          ]
+        },
+        {
+          "slug": "rushin-workshops",
+          "t": "RUSHIN WORKSHOPS",
+          "c": "Rushin",
+          "y": "2024",
+          "r": "Art Director & Designer",
+          "img": "projects/02-posters/rushin-workshops/cover.webp",
+          "video": null,
+          "gallery": [
+            "projects/02-posters/rushin-workshops/01.webp",
+            "projects/02-posters/rushin-workshops/02.webp",
+            "projects/02-posters/rushin-workshops/03.webp",
+            "projects/02-posters/rushin-workshops/04.webp",
+            "projects/02-posters/rushin-workshops/05.webp",
+            "projects/02-posters/rushin-workshops/06.webp"
+          ],
+          "link": null,
+          "tag": "POSTER DESIGN / AI-GENERATED PHOTOGRAPHY / 2024",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "Rushin Workshops is a series of educational and scientific workshops designed for students, covering different subjects and hands-on learning experiences. Each workshop introduces participants to a specific scientific field through practical activities, experiments, and exploration.",
+          "a": "As the Art Director and Designer, I developed the poster series for the Rushin workshops using and AI-generated photography and photomanipulation as the main visual approaches. For each workshop, I extracted distinctive elements from its scientific activities and combined them into unexpected compositions to create curious and engaging images that encourage students to explore the workshop.\nAlongside the visual development, I designed a workflow that could turn workshop information into a ready-to-publish poster through a structured process. Workshop data and content would enter the workflow from one side, while a generated visual would emerge from the other, with the final poster information then laid out on top of the image. This approach allowed the posters to move efficiently from workshop brief to final assets ready for digital publishing and print.",
+          "credit": null,
+          "roles": [
+            "Art Direction",
+            "Poster Design",
+            "Photomanipulation",
+            "AI Image Generation",
+            "Visual Concept Development"
           ]
         }
       ]
