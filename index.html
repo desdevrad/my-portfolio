@@ -372,13 +372,15 @@
   .card .thumb video,.detail-img video{width:100%;height:100%;object-fit:cover;display:block}
 
   /* gallery — every image in a project folder, minus the cover */
-  .gal{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .gal{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;align-items:start}
   .gal[hidden]{display:none}
   .gal button{display:block;padding:0;background:transparent;
     border:1px solid var(--hair);overflow:hidden;line-height:0;transition:border-color .25s}
   .gal button:hover,.gal button:focus-visible{border-color:var(--line)}
-  .gal img{width:100%;aspect-ratio:10/7;object-fit:cover;display:block;
-    transition:transform .55s cubic-bezier(.2,.8,.3,1)}
+  /* 10/7 only reserves space until the file loads; JS then swaps in the
+     image's real ratio, so a portrait poster is never cropped to landscape. */
+  .gal img{width:100%;height:auto;aspect-ratio:var(--media-ar,10/7);object-fit:contain;
+    display:block;transition:transform .55s cubic-bezier(.2,.8,.3,1)}
   .gal button:hover img,.gal button:focus-visible img{transform:scale(1.04)}
 
   /* client logos — flattened to the HUD's monochrome, true colour on hover */
@@ -395,6 +397,11 @@
      a wide video is never cropped at the sides to fill the 10/7 still box. */
   .detail-img.is-video{aspect-ratio:var(--media-ar,16/9)}
   .detail-img.is-video video{object-fit:contain;background:#000}
+
+  /* Same idea for stills: the frame takes the photo's own ratio once it
+     loads, so posters stay portrait instead of being cropped to 10/7. */
+  .detail-img.is-img{aspect-ratio:var(--media-ar,10/7)}
+  .detail-img.is-img img{object-fit:contain}
 
   .detail-img img{width:100%;height:100%;object-fit:cover;display:block}
   .detail-img img[role=button]:focus-visible{outline:1px solid var(--ice);outline-offset:-3px}
@@ -2161,6 +2168,18 @@ const esc = s => String(s == null ? '' : s)
 const calm = ()=> matchMedia('(prefers-reduced-motion:reduce)').matches;
 
 /* A cover image if the folder has one, else a video, else procedural artwork. */
+/* Publishes an image's real ratio as --media-ar on `frame`, so the box around
+   it can size itself to the file instead of a fixed landscape crop. */
+function fitStill(img, frame){
+  const el = frame || img;
+  const set = ()=>{
+    if(img.naturalWidth && img.naturalHeight)
+      el.style.setProperty('--media-ar', img.naturalWidth + '/' + img.naturalHeight);
+  };
+  if(img.complete) set();
+  img.addEventListener('load', set);
+}
+
 function workMedia(w, f, seed, thumb){
   if(w.img){
     return '<img src="'+esc(w.img)+'" alt="'+esc(w.t)+'"' +
@@ -2225,6 +2244,11 @@ function openWork(k){
     fitFrame();
   }
 
+  /* Stills do the same: the cover keeps its own ratio, portrait or landscape. */
+  const cover = dimg.querySelector('img');
+  dimg.classList.toggle('is-img', !!cover);
+  if(cover) fitStill(cover, dimg);
+
   watchVideo(vid);
 
   /* the cover leads, then everything else in the folder */
@@ -2256,6 +2280,7 @@ function openWork(k){
       '<img src="'+esc(src)+'" alt="'+esc(w.t)+' \u2014 '+(n+1+offset)+'" loading="lazy" decoding="async">' +
     '</button>'
   ).join('');
+  gal.querySelectorAll('img').forEach(im=>fitStill(im));
   gal.querySelectorAll('button').forEach((btn,n)=>{
     btn.addEventListener('pointerenter', ()=>blip(1180, 0.026));
     btn.addEventListener('click', ()=>openLens(shots, n + offset, w.t));
