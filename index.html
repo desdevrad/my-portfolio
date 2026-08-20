@@ -380,7 +380,8 @@
   /* 10/7 only reserves space until the file loads; JS then swaps in the
      image's real ratio, so a portrait poster is never cropped to landscape. */
   .gal img{width:100%;height:auto;aspect-ratio:var(--media-ar,10/7);object-fit:contain;
-    display:block;transition:transform .55s cubic-bezier(.2,.8,.3,1)}
+    display:block;transition:transform .55s cubic-bezier(.2,.8,.3,1),opacity .5s ease,
+      aspect-ratio .35s cubic-bezier(.2,.8,.3,1)}
   .gal button:hover img,.gal button:focus-visible img{transform:scale(1.04)}
 
   /* client logos — flattened to the HUD's monochrome, true colour on hover */
@@ -398,10 +399,26 @@
   .detail-img.is-video{aspect-ratio:var(--media-ar,16/9)}
   .detail-img.is-video video{object-fit:contain;background:#000}
 
-  /* Same idea for stills: the frame takes the photo's own ratio once it
-     loads, so posters stay portrait instead of being cropped to 10/7. */
+  /* Same idea for stills: the frame takes the photo's own ratio, so posters
+     stay portrait instead of being cropped to 10/7. The ratio is normally
+     known before the frame paints; `ar-soft` covers the rare late case by
+     easing the correction instead of snapping it. */
   .detail-img.is-img{aspect-ratio:var(--media-ar,10/7)}
   .detail-img.is-img img{object-fit:contain}
+  .detail-img.ar-soft{transition:aspect-ratio .35s cubic-bezier(.2,.8,.3,1)}
+
+  /* A loading plate that reads as intentional, rather than a hollow box. */
+  .detail-img.skel,.gal button.skel{background:
+    linear-gradient(100deg,transparent 0 38%,var(--sheet) 50%,transparent 62% 100%),
+    var(--plate);
+    background-size:260% 100%,auto;background-repeat:no-repeat;
+    animation:skelsweep 1.5s linear infinite}
+  @keyframes skelsweep{from{background-position:160% 0,0 0}to{background-position:-60% 0,0 0}}
+
+  /* The picture dissolves in over its own frame instead of popping. */
+  .detail-img.is-img img{opacity:0;transition:opacity .5s ease}
+  .gal img{opacity:0}
+  .detail-img.is-img img.ready,.gal img.ready{opacity:1}
 
   .detail-img img{width:100%;height:100%;object-fit:cover;display:block}
   .detail-img img[role=button]:focus-visible{outline:1px solid var(--ice);outline-offset:-3px}
@@ -438,6 +455,9 @@
   /* ambient loops are decorative — hold the first frame instead */
   @media (prefers-reduced-motion:reduce){
     .card .thumb video,.detail-img video{animation:none}
+    .detail-img.skel,.gal button.skel{animation:none;background:var(--plate)}
+    .detail-img.ar-soft{transition:none}
+    .gal img{transition:none}
   }
 
   /* ── boot ─────────────────────────────────────────── */
@@ -2137,7 +2157,11 @@ function openField(i){
     c.innerHTML = '<span class="thumb">'+workMedia(w, f, i*97 + k*13 + 5, true)+'</span>' +
       '<span class="meta"><b>'+esc(w.t)+'</b><span>'+esc(w.y || '')+'</span></span>';
     c.style.opacity = '0'; c.style.transform = 'translateY(16px)';
-    c.addEventListener('pointerenter', ()=>blip(1180, 0.026));
+    /* the thumb is the cover file, so its ratio is free to learn here — and
+       reaching for a card warms the rest of that folder ahead of the click */
+    noteAR(c.querySelector('img'), w.img);
+    c.addEventListener('pointerenter', ()=>{ blip(1180, 0.026); warmWork(w); });
+    c.addEventListener('focus', ()=>warmWork(w));
     watchVideo(c.querySelector('video'));
     c.addEventListener('click', ()=>openWork(k));
     gridEl.appendChild(c);
@@ -2168,16 +2192,90 @@ const esc = s => String(s == null ? '' : s)
 const calm = ()=> matchMedia('(prefers-reduced-motion:reduce)').matches;
 
 /* A cover image if the folder has one, else a video, else procedural artwork. */
-/* Publishes an image's real ratio as --media-ar on `frame`, so the box around
-   it can size itself to the file instead of a fixed landscape crop. */
-function fitStill(img, frame){
-  const el = frame || img;
-  const set = ()=>{
+/* ── image ratios ─────────────────────────────────────
+   A frame that knows the file's shape before it paints never jumps. Ratios
+   are measured once per src, off-DOM, and cached — so by the time a project
+   opens, its boxes are already the right shape. */
+const AR = new Map();          // src -> "w/h"
+const AR_WAIT = new Map();     // src -> promise, so a src is measured once
+
+const arVar = src => AR.has(src) ? ' style="--media-ar:' + AR.get(src) + '"' : '';
+
+/* Record a ratio from an <img> that is already on the page (a grid thumb, say)
+   — the file is downloaded either way, so this costs nothing. */
+function noteAR(img, src){
+  if(!img || !src || AR.has(src)) return;
+  const grab = ()=>{
     if(img.naturalWidth && img.naturalHeight)
-      el.style.setProperty('--media-ar', img.naturalWidth + '/' + img.naturalHeight);
+      AR.set(src, img.naturalWidth + '/' + img.naturalHeight);
   };
-  if(img.complete) set();
-  img.addEventListener('load', set);
+  if(img.complete) grab(); else img.addEventListener('load', grab, { once:true });
+}
+
+function measureAR(src){
+  if(!src) return Promise.resolve('');
+  if(AR.has(src)) return Promise.resolve(AR.get(src));
+  if(AR_WAIT.has(src)) return AR_WAIT.get(src);
+
+  const p = new Promise(res=>{
+    const im = new Image();
+    im.decoding = 'async';
+    const grab = ()=>{
+      if(!im.naturalWidth || !im.naturalHeight) return false;
+      const ar = im.naturalWidth + '/' + im.naturalHeight;
+      AR.set(src, ar); res(ar); return true;
+    };
+    /* Dimensions sit in the file header, so they are readable long before the
+       last byte lands — polling gets them frames earlier than `load` would. */
+    const poll = ()=>{
+      if(grab()) return;
+      if(im.complete) res('');
+      else requestAnimationFrame(poll);
+    };
+    im.onload  = ()=>{ if(!grab()) res(''); };
+    im.onerror = ()=>res('');
+    im.src = src;
+    requestAnimationFrame(poll);
+  });
+
+  AR_WAIT.set(src, p);
+  return p;
+}
+
+const warmAR = list => (list || []).filter(Boolean).forEach(measureAR);
+
+/* Everything a project will show, warmed the moment the card is touched. */
+const warmWork = w => { if(w) warmAR([w.img].concat(w.gallery || [])); };
+
+/* Covers for the whole index, once the browser is otherwise idle. */
+function warmCovers(){
+  idle(()=>{
+    const covers = [];
+    FIELDS.forEach(f => (f.works || []).forEach(w => { if(w.img) covers.push(w.img); }));
+    warmAR(covers);
+  });
+}
+
+/* Give `frame` the ratio of `src`: instantly when it is known, otherwise as
+   soon as the header arrives. `token` guards against a fast click-through
+   landing an old measurement on the new project. */
+function applyAR(frame, src, token){
+  if(!src) return;
+  if(AR.has(src)){ frame.style.setProperty('--media-ar', AR.get(src)); return; }
+  frame.classList.add('ar-soft');       // let the correction ease in, not snap
+  measureAR(src).then(ar=>{
+    if(ar && frame.dataset.arToken === token) frame.style.setProperty('--media-ar', ar);
+  });
+}
+
+/* Fade the picture in over its own frame instead of popping it into place. */
+function revealOnLoad(img, frame){
+  const done = ()=>{ img.classList.add('ready'); if(frame) frame.classList.remove('skel'); };
+  if(img.complete && img.naturalWidth) done();
+  else{
+    img.addEventListener('load', done, { once:true });
+    img.addEventListener('error', done, { once:true });
+  }
 }
 
 function workMedia(w, f, seed, thumb){
@@ -2244,10 +2342,18 @@ function openWork(k){
     fitFrame();
   }
 
-  /* Stills do the same: the cover keeps its own ratio, portrait or landscape. */
+  /* Stills do the same: the cover keeps its own ratio, portrait or landscape.
+     The ratio is usually already cached from the grid thumb, so the frame is
+     the right shape on its first paint. */
   const cover = dimg.querySelector('img');
+  dimg.classList.remove('ar-soft', 'skel');
   dimg.classList.toggle('is-img', !!cover);
-  if(cover) fitStill(cover, dimg);
+  dimg.dataset.arToken = String(fieldIx) + ':' + String(k);
+  if(cover){
+    applyAR(dimg, w.img, dimg.dataset.arToken);
+    dimg.classList.add('skel');
+    revealOnLoad(cover, dimg);
+  }
 
   watchVideo(vid);
 
@@ -2275,16 +2381,27 @@ function openWork(k){
   const rest = w.gallery || [];
   const offset = w.img ? 1 : 0;
   gal.hidden = rest.length === 0;
+  /* A cached ratio is written straight into the markup, so the tile is born
+     the right shape — nothing to correct afterwards. */
   gal.innerHTML = rest.map((src,n)=>
-    '<button class="gshot" type="button" data-tag="VIEW" aria-label="View image '+(n+1+offset)+'">' +
-      '<img src="'+esc(src)+'" alt="'+esc(w.t)+' \u2014 '+(n+1+offset)+'" loading="lazy" decoding="async">' +
+    '<button class="gshot skel" type="button" data-tag="VIEW"'+arVar(src)+
+      ' aria-label="View image '+(n+1+offset)+'">' +
+      '<img src="'+esc(src)+'" alt="'+esc(w.t)+' \u2014 '+(n+1+offset)+'" decoding="async">' +
     '</button>'
   ).join('');
-  gal.querySelectorAll('img').forEach(im=>fitStill(im));
   gal.querySelectorAll('button').forEach((btn,n)=>{
+    const src = rest[n], im = btn.querySelector('img');
+    btn.dataset.arToken = dimg.dataset.arToken + ':' + n;
+    applyAR(btn, src, btn.dataset.arToken);
+    revealOnLoad(im, btn);
+    noteAR(im, src);
     btn.addEventListener('pointerenter', ()=>blip(1180, 0.026));
     btn.addEventListener('click', ()=>openLens(shots, n + offset, w.t));
   });
+
+  /* PREV / NEXT should land as cleanly as the first open */
+  warmWork(f.works[(k + 1) % f.works.length]);
+  warmWork(f.works[(k - 1 + f.works.length) % f.works.length]);
 
   gridView.classList.add('hide');
   detailView.classList.remove('hide');
@@ -3233,6 +3350,7 @@ function applyContent(c){
   buildChips();
   placeChips();
   refreshExplore();
+  warmCovers();
 }
 
 fetch('content.json', { cache: 'no-cache' })
