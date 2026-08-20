@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-20T12:45:01.284Z",
+  "generated": "2026-08-20T14:53:19.803Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -461,7 +461,11 @@
           "r": "Creative Director & Designer",
           "img": "projects/01-logos/molko/cover.webp",
           "video": null,
-          "gallery": [],
+          "gallery": [
+            "projects/01-logos/molko/01.webp",
+            "projects/01-logos/molko/02.webp",
+            "projects/01-logos/molko/03.webp"
+          ],
           "link": null,
           "tag": "LOGO & VISUAL IDENTITY / 2020",
           "lb": "OVERVIEW",
@@ -513,7 +517,7 @@
         },
         {
           "slug": "divar-yalda2025",
-          "t": "DIVAR YALDA",
+          "t": "DIVAR YALDA 2024",
           "c": "Divar",
           "y": "2024",
           "r": "Creative Director & Designer",
