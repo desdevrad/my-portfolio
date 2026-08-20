@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-20T12:33:21.213Z",
+  "generated": "2026-08-20T12:45:01.284Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -130,6 +130,11 @@
       },
       {
         "name": "XENSE",
+        "scope": "CREATIVE DIRECTION",
+        "year": "2024"
+      },
+      {
+        "name": "DIVAR",
         "scope": "CREATIVE DIRECTION",
         "year": "2024"
       },
@@ -508,10 +513,10 @@
         },
         {
           "slug": "divar-yalda2025",
-          "t": "DIVAR YALDA2025",
-          "c": "",
-          "y": "",
-          "r": "",
+          "t": "DIVAR YALDA",
+          "c": "Divar",
+          "y": "2024",
+          "r": "Creative Director & Designer",
           "img": "projects/02-posters/divar-yalda2025/cover.webp",
           "video": null,
           "gallery": [
@@ -519,12 +524,17 @@
             "projects/02-posters/divar-yalda2025/DYP-05.webp"
           ],
           "link": null,
-          "tag": null,
-          "lb": null,
-          "la": null,
-          "b": "",
-          "a": "",
-          "credit": null
+          "tag": "EVENT IDENTITY / YALDA / 2024",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "Divar Yalda was a celebration organized for the Divar team around Yalda Night, one of the most important Iranian cultural traditions. The event brought together familiar elements of Yalda, including pomegranates, nuts, Hafez poetry, music, and other symbols associated with the celebration.",
+          "a": "As the Creative Director and Designer, I was responsible for designing the event poster and visual direction. I combined traditional Yalda elements such as pomegranates, nuts, Hafez's poetry, and music with the existing visual language of Divar.\nThe goal was to create a visual that felt distinctly connected to Yalda while remaining consistent with Divar's brand identity. These cultural references were reinterpreted through Divar's visual system to create a cohesive and contemporary event graphic.",
+          "credit": null,
+          "roles": [
+            "Creative Direction",
+            "Poster Design",
+            "Visual Identity Design"
+          ]
         }
       ]
     },
