@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-20T21:41:39.880Z",
+  "generated": "2026-08-21T10:49:35.691Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -648,43 +648,10 @@
       ]
     },
     {
-      "key": "3D",
-      "sub": "FORM & RENDER",
-      "kind": 2,
-      "order": 2,
-      "works": [
-        {
-          "slug": "threads",
-          "t": "3D THREADS LOGO",
-          "c": "Self-Initiated",
-          "y": "2023",
-          "r": "3D Artist & Designer",
-          "img": "projects/03-3D/threads/cover.webp",
-          "video": null,
-          "gallery": [
-            "projects/03-3D/threads/01.webp"
-          ],
-          "link": null,
-          "tag": "3D / EXPERIMENTAL / 2023",
-          "lb": "OVERVIEW",
-          "la": "CONTRIBUTION",
-          "b": "3D Threads Logo is a self-initiated exploration of the Threads logo through a three-dimensional approach. The project investigates how an existing digital brand mark can be reinterpreted as a physical-looking 3D object while incorporating elements of Instagram's visual language.",
-          "a": "I recreated and experimented with the Threads logo in Blender, transforming the flat mark into a three-dimensional form. The 3D treatment allowed me to explore Instagram's brand DNA through its visual language, materials, lighting, and color palette, creating a new interpretation of the logo beyond its original two-dimensional form.",
-          "credit": null,
-          "roles": [
-            "3D Design",
-            "Blender",
-            "Experimental Branding"
-          ],
-          "self": true
-        }
-      ]
-    },
-    {
-      "key": "XR",
-      "sub": "SPATIAL & REALTIME",
+      "key": "SPATIAL",
+      "sub": "OBJECTS & ENVIRONMENTS",
       "kind": 3,
-      "order": 3,
+      "order": 2,
       "works": [
         {
           "slug": "appear",
@@ -692,7 +659,7 @@
           "c": "",
           "y": "2025",
           "r": "3D Artist",
-          "img": "projects/04-xr/appear/cover.webp",
+          "img": "projects/03-spatial/appear/cover.webp",
           "video": null,
           "gallery": [],
           "link": "https://www.instagram.com/p/DXoPIy8iJ07/",
@@ -711,6 +678,31 @@
             "Real-time Asset Creation",
             "AR Content Production"
           ]
+        },
+        {
+          "slug": "threads",
+          "t": "3D THREADS LOGO",
+          "c": "Self-Initiated",
+          "y": "2023",
+          "r": "3D Artist & Designer",
+          "img": "projects/03-spatial/threads/cover.webp",
+          "video": null,
+          "gallery": [
+            "projects/03-spatial/threads/01.webp"
+          ],
+          "link": null,
+          "tag": "3D / EXPERIMENTAL / 2023",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "3D Threads Logo is a self-initiated exploration of the Threads logo through a three-dimensional approach. The project investigates how an existing digital brand mark can be reinterpreted as a physical-looking 3D object while incorporating elements of Instagram's visual language.",
+          "a": "I recreated and experimented with the Threads logo in Blender, transforming the flat mark into a three-dimensional form. The 3D treatment allowed me to explore Instagram's brand DNA through its visual language, materials, lighting, and color palette, creating a new interpretation of the logo beyond its original two-dimensional form.",
+          "credit": null,
+          "roles": [
+            "3D Design",
+            "Blender",
+            "Experimental Branding"
+          ],
+          "self": true
         }
       ]
     },
@@ -718,7 +710,7 @@
       "key": "MOTION",
       "sub": "TIME & SEQUENCE",
       "kind": 4,
-      "order": 4,
+      "order": 3,
       "works": [
         {
           "slug": "gravitas+",
@@ -727,7 +719,7 @@
           "y": "2026",
           "r": "Creative Director & Designer",
           "img": null,
-          "video": "projects/05-motion/gravitas+/motion.mp4",
+          "video": "projects/04-motion/gravitas+/motion.mp4",
           "gallery": [],
           "link": null,
           "tag": "LOGO & VISUAL IDENTITY / 2026",
@@ -751,7 +743,7 @@
           "y": "2024",
           "r": "Creative Director & Designer",
           "img": null,
-          "video": "projects/05-motion/rushin/motion.mp4",
+          "video": "projects/04-motion/rushin/motion.mp4",
           "gallery": [],
           "link": null,
           "tag": "LOGO & VISUAL IDENTITY / 2024",

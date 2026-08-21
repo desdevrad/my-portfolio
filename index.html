@@ -683,7 +683,7 @@
   <footer class="bot">
     <div class="readout">
       <span><b>GEOMETRY</b><em id="tri">2,312 TRI / WATERTIGHT</em></span>
-      <span><b>PRACTICE</b><em id="practice">LOGOS / POSTERS / 3D / XR / MOTION</em></span>
+      <span><b>PRACTICE</b><em id="practice">LOGOS / POSTERS / SPATIAL / MOTION</em></span>
       <span><b>RENDER</b><em id="fps">--</em> FPS</span>
     </div>
     <div class="tail">
@@ -1986,21 +1986,28 @@ function art(kind, seed){
       y += (i===0?90:44);
     }
     s += '<rect x="'+(W-320)+'" y="'+(H-250)+'" width="180" height="180" fill="var(--ph3)" opacity=".9"/>';
-  }else if(kind === 2){                             // 3d
+  }else if(kind === 2){                             // spatial — a solid, sited
+    // the old 3d and xr placeholders, now one image: the frames and tracking
+    // points put the form somewhere, which is the whole point of the merge
+    for(let i=0;i<2;i++){
+      const m = 110 + i*90;
+      s += '<rect x="'+m+'" y="'+(m*0.62)+'" width="'+(W-m*2)+'" height="'+(H-m*1.24)+'" fill="none" stroke="var(--ph2)" stroke-width="'+(i===0?2:1)+'"/>';
+    }
+    for(let i=0;i<7;i++) s += '<circle cx="'+(160+r()*680)+'" cy="'+(120+r()*460)+'" r="'+(3+r()*5)+'" fill="var(--ph2)"/>';
+
     const cx = 500, cy = 350, k = 150 + r()*40;
     const p = (x,y)=> (cx + x) + ',' + (cy + y);
     s += '<polygon points="'+p(0,-k*1.15)+' '+p(k,-k*0.55)+' '+p(0,0)+' '+p(-k,-k*0.55)+'" fill="var(--ph3)" opacity=".92"/>';
     s += '<polygon points="'+p(-k,-k*0.55)+' '+p(0,0)+' '+p(0,k*1.15)+' '+p(-k,k*0.55)+'" fill="var(--ph2)"/>';
     s += '<polygon points="'+p(k,-k*0.55)+' '+p(0,0)+' '+p(0,k*1.15)+' '+p(k,k*0.55)+'" fill="var(--ph1)"/>';
     s += '<polygon points="'+p(0,-k*1.15)+' '+p(k,-k*0.55)+' '+p(k,k*0.55)+' '+p(0,k*1.15)+' '+p(-k,k*0.55)+' '+p(-k,-k*0.55)+'" fill="none" stroke="var(--ph2)" stroke-width="2"/>';
-  }else if(kind === 3){                             // xr
-    for(let i=0;i<4;i++){
-      const m = 110 + i*70;
-      s += '<rect x="'+m+'" y="'+(m*0.62)+'" width="'+(W-m*2)+'" height="'+(H-m*1.24)+'" fill="none" stroke="var(--ph2)" stroke-width="'+(i===0?2:1)+'"/>';
-    }
-    s += '<circle cx="500" cy="350" r="8" fill="var(--ph3)"/>';
-    s += '<path d="M420 350 h50 M530 350 h50 M500 270 v50 M500 380 v50" stroke="var(--ph3)" stroke-width="2"/>';
-    for(let i=0;i<9;i++) s += '<circle cx="'+(160+r()*680)+'" cy="'+(120+r()*460)+'" r="'+(3+r()*5)+'" fill="var(--ph2)"/>';
+
+    // the innermost frame is a bracket, not a box: the form is being
+    // registered against the space it sits in
+    const bx = 290, by = 180, bw = W - bx*2, bh = H - by*2, t = 46;
+    s += '<path d="M'+bx+' '+(by+t)+' v-'+t+' h'+t+' M'+(bx+bw-t)+' '+by+' h'+t+' v'+t
+      + ' M'+(bx+bw)+' '+(by+bh-t)+' v'+t+' h-'+t+' M'+(bx+t)+' '+(by+bh)+' h-'+t+' v-'+t+'" '
+      + 'fill="none" stroke="var(--ph3)" stroke-width="2"/>';
   }else{                                            // motion
     for(let i=0;i<7;i++){
       s += '<rect x="'+(110 + i*104)+'" y="'+(200 + Math.sin(i*0.9)*70)+'" width="72" height="'+(180 + i*22)+'" fill="var(--ph2)" opacity="'+(0.25 + i*0.11).toFixed(2)+'"/>';
