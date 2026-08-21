@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-21T10:49:35.691Z",
+  "generated": "2026-08-21T22:04:20.708Z",
   "site": {
     "name": "Kiarash Farahmandrad",
     "role": "Multi-disciplinary designer",
@@ -162,6 +162,11 @@
         "name": "WILLOW BEAUTY PRODUCTS",
         "scope": "CREATIVE DIRECTION",
         "year": "2023"
+      },
+      {
+        "name": "THREEPTYCH",
+        "scope": "CREATIVE DIRECTION",
+        "year": "2022"
       },
       {
         "name": "MOLKO",
@@ -520,6 +525,33 @@
           "la": "CONTRIBUTION",
           "b": "Willow is a beauty brand dedicated to natural, plant-based skincare. The brand's ethos centers on the idea that true beauty comes from nature, with products crafted using sustainable botanical ingredients to nourish and enhance the skin.\nThe visual identity was developed to reflect Willow's natural, eco-conscious values while creating a sense of elegance, serenity, and refined beauty.",
           "a": "As the Creative Director and Designer, I was responsible for developing the logo and visual identity for Willow. The core concept combines the essence of a flower with the brand's initial “W”, creating a distinctive symbol that connects the identity to its botanical foundation.\nThe design direction focused on creating a balance between organic forms and modern simplicity, resulting in an identity that feels natural, sophisticated, and suitable for a luxury skincare brand.",
+          "credit": null,
+          "roles": [
+            "Creative Direction",
+            "Logo Design",
+            "Visual Identity Design"
+          ]
+        },
+        {
+          "slug": "threeptych",
+          "t": "THREEPTYCH DESIGN STUDIO",
+          "c": "Threeptych",
+          "y": "2022",
+          "r": "Creative Director & Designer",
+          "img": "projects/01-logos/threeptych/cover.webp",
+          "video": null,
+          "gallery": [
+            "projects/01-logos/threeptych/02.webp",
+            "projects/01-logos/threeptych/03.webp",
+            "projects/01-logos/threeptych/04.webp",
+            "projects/01-logos/threeptych/05.webp"
+          ],
+          "link": null,
+          "tag": "LOGO & VISUAL IDENTITY / 2022",
+          "lb": "OVERVIEW",
+          "la": "CONTRIBUTION",
+          "b": "Threeptych Design Studio is a design studio focused on developing creative visual solutions across different disciplines.",
+          "a": "I developed the logo and visual identity around the number “3”. The numeral is divided into three distinct sections, following the proportions and visual logic of traditional triptych paintings. The resulting mark creates a direct connection between the studio's name and the history of three-panel compositions, while providing a simple and recognizable visual system that can be extended across the studio's identity and applications.",
           "credit": null,
           "roles": [
             "Creative Direction",
